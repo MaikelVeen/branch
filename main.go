@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if err := cli.Root(root,
-		cli.Tree(InitCommand),
+		cli.Tree(LoginCommand),
 	).Run(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
