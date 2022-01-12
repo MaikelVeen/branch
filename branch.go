@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
 	"os/exec"
+	"strings"
 
+	"github.com/MaikelVeen/branch/jira"
 	"github.com/fatih/color"
 	"github.com/tucnak/climax"
 )
@@ -29,32 +32,55 @@ func GetBranchCommand() climax.Command {
 func HandleBranchCommand(ctx climax.Context) int {
 	//TODO: replace color.red calls with generic error call with debug option.
 
-	_, ok := ctx.Get("issue")
+	key, ok := ctx.Get("issue")
 	if !ok {
 		color.Red("issue argument is not optional")
-		return 0
+		return 1
+	}
+
+	client, err := jira.NewJiraApi(keyRingService, keyRingUser)
+	if err != nil {
+		color.Red("Could not instantiate jira api client")
+		return 1
 	}
 
 	if err := ExecGitStatus(); err != nil {
 		color.Red("Git status command failed, are you in a git repo?")
-		return 0
+		return 1
 	}
 
 	if err := ExecCleanTreeCheck(); err != nil {
 		color.Red("Working tree is not clean; commit or stash changes and try again")
-		return 0
+		return 1
 	}
 
 	con, err := ExecBranchCheck()
 	if err != nil {
 		color.Red("Failed to check what branch you are one")
+		return 1
 	}
 
 	if !con {
 		return 0
 	}
 
-	color.Blue("almost there")
+	issue, err := client.GetIssue(key)
+	if err != nil {
+		if errors.Is(err, jira.ErrUnauthorized) {
+			color.Red("Invalid credentials")
+
+			return 1
+		}
+
+		if errors.Is(err, jira.ErrNotFound) {
+			color.Yellow("Issue %s was not found", key)
+
+			return 0
+		}
+	}
+
+	branchName := GetBranchNameFromIssue(issue)
+	color.Green(branchName)
 
 	return 0
 }
@@ -90,4 +116,21 @@ func ExecBranchCheck() (bool, error) {
 func ExecCleanTreeCheck() error {
 	cmd := exec.Command("git", "diff-index", "--quiet", "HEAD")
 	return cmd.Run()
+}
+
+func GetBranchNameFromIssue(issue jira.IssueBean) string {
+	base := getBranchBase(issue)
+
+	parts := strings.Split(strings.ToLower(issue.Fields.Summary), " ")
+	hyphenated := strings.Join(parts[:12], "-")
+
+	return base + hyphenated
+}
+
+func getBranchBase(issue jira.IssueBean) string {
+	if StringInSliceCaseInsensitive(issue.Fields.Issuetype.Name, []string{"bug"}) {
+		return "hotfix/"
+	}
+
+	return "feature/"
 }

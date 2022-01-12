@@ -48,8 +48,20 @@ func buildBaseUrl(domain string) string {
 
 // NewJiraApi returns a new instance of JiraApi with credentials
 // gathered from the local keyring.
-func NewJiraApi() JiraClient {
-	return &jiraClient{}
+func NewJiraApi(service, user string) (JiraClient, error) {
+	client := &jiraClient{}
+
+	creds, err := keyring.Get(service, user)
+	if err != nil {
+		return client, err
+	}
+
+	err = json.Unmarshal([]byte(creds), &client)
+	if err != nil {
+		return client, err
+	}
+
+	return client, nil
 }
 
 // SaveToKeyring saves the credentials of the current client to the

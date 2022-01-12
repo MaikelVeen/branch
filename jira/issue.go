@@ -49,17 +49,17 @@ type IssueBean struct {
 }
 
 type IssueBeanFields struct {
-	Issuetype    Issuetype    `json:"issuetype"`
-	Watcher      Watcher      `json:"watcher"`
-	Attachment   []Attachment `json:"attachment"`
-	SubTasks     []Issuelink  `json:"sub-tasks"`
-	Description  Description  `json:"description"`
-	Project      Project      `json:"project"`
-	Comment      []Comment    `json:"comment"`
-	Issuelinks   []Issuelink  `json:"issuelinks"`
-	Worklog      []Worklog    `json:"worklog"`
-	Updated      int64        `json:"updated"`
-	Timetracking Timetracking `json:"timetracking"`
+	Issuetype   Issuetype    `json:"issuetype"`
+	Watcher     Watcher      `json:"watcher"`
+	Attachment  []Attachment `json:"attachment"`
+	SubTasks    []Issuelink  `json:"sub-tasks"`
+	Description Description  `json:"description"`
+	Project     Project      `json:"project"`
+	Comment     []Comment    `json:"comment"`
+	Issuelinks  []Issuelink  `json:"issuelinks"`
+	Worklog     []Worklog    `json:"worklog"`
+	Updated     int64        `json:"updated"`
+	Summary     string       `json:"summary"`
 }
 
 type Attachment struct {

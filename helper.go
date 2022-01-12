@@ -32,3 +32,14 @@ func UserConfirmation(s string, tries int) bool {
 
 	return false
 }
+
+// StringInSliceCaseInsensitive checks whether a string exists in a slice.
+func StringInSliceCaseInsensitive(str string, slice []string) bool {
+	for _, sliceItem := range slice {
+		if strings.EqualFold(str, sliceItem) {
+			return true
+		}
+	}
+
+	return false
+}
