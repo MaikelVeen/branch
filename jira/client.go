@@ -2,17 +2,18 @@ package jira
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/zalando/go-keyring"
 )
 
+var ErrUnauthorized = errors.New("received 401")
+
 type jiraClient struct {
 	BaseURL string `json:"url"`
 	Email   string `json:"email"`
 	Token   string `json:"token"`
-
-	apiPath string
 
 	B Backend
 }
@@ -21,6 +22,8 @@ type JiraClient interface {
 	// SaveToKeyring saves the credentials of the current client to the
 	// system keyring.
 	SaveToKeyring(service, user string) error
+
+	MyselfResource
 }
 
 // InitializeApiFromInit returns a new instance of JiraClient based on the
@@ -33,7 +36,6 @@ func InitializeApiFromInit(email, domain, token string) JiraClient {
 		Email:   email,
 		BaseURL: url,
 		Token:   token,
-		apiPath: "rest/api/3/",
 		B:       b,
 	}
 }

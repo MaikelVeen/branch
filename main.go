@@ -1,17 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/mkideal/cli"
+	"github.com/tucnak/climax"
 )
 
 func main() {
-	if err := cli.Root(root,
-		cli.Tree(LoginCommand),
-	).Run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	cli := climax.New("branch")
+	cli.Brief = ""
+	cli.Version = "stable"
+
+	cli.AddCommand(GetLoginCommand())
+	cli.Run()
 }

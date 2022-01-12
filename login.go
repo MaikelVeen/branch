@@ -6,46 +6,86 @@ import (
 	"net/mail"
 
 	"github.com/MaikelVeen/branch/jira"
-	"github.com/mkideal/cli"
+	"github.com/fatih/color"
+	"github.com/tucnak/climax"
 )
 
 // TODO: make configurable
 const keyRingService = "branch-cli"
 const keyRingUser = "branch-cli-anon"
 
-type loginCommand struct {
-	Help   bool   `cli:"h,help" usage:"show help" json:"-"`
-	Email  string `cli:"e" usage:"The email associated with your Jira Account" json:"email"`
-	Domain string `cli:"d" usage:"The domain of your Jira the part in the url before: atlassian.net" json:"domain"`
-	Token  string `cli:"t" usage:"The API token of your Jira account" json:"token"`
+func GetLoginCommand() climax.Command {
+	return climax.Command{
+		Name:  "login",
+		Brief: "authenticates with Jira",
+
+		Flags: []climax.Flag{
+			{
+				Name:     "email",
+				Short:    "e",
+				Usage:    `--email="."`,
+				Help:     `The email associated with your Jira Account`,
+				Variable: true,
+			},
+			{
+				Name:     "domain",
+				Short:    "d",
+				Usage:    `--domain="."`,
+				Help:     `The domain of your Jira the part in the url before: atlassian.net" json:"domain`,
+				Variable: true,
+			},
+			{
+				Name:     "token",
+				Short:    "t",
+				Usage:    `--token="."`,
+				Help:     `The API token of your Jira account`,
+				Variable: true,
+			},
+		},
+		Handle: HandleLoginCommand,
+	}
 }
 
-func (argv *loginCommand) AutoHelp() bool {
-	return argv.Help
+type LoginCommand struct {
+	Email  string
+	Token  string
+	Domain string
 }
 
-var LoginCommand = &cli.Command{
-	Name: "login",
-	Desc: "Login will validate the passed credentials and save them to the keyring",
-	Argv: func() interface{} { return new(loginCommand) },
-	Fn:   ExecuteLoginCommand,
-}
+func LoginCommandFromCliCtx(ctx climax.Context) (*LoginCommand, error) {
+	//TODO: make more dry, tag based reflective lookup ?
+	cmd := &LoginCommand{}
 
-// Validate implements cli.Validator interface
-func (argv *loginCommand) Validate(ctx *cli.Context) error {
-	if !validEmail(argv.Email) {
-		return fmt.Errorf("%s is not a valid email address", argv.Email)
+	if email, ok := ctx.Get("email"); !ok {
+		color.Red("email not set in argument list")
+
+		return cmd, errors.New("email not set")
+	} else {
+		if !validEmail(email) {
+			color.Red("email is not valid")
+
+			return cmd, errors.New("email not valid")
+		}
+		cmd.Email = email
 	}
 
-	if argv.Domain == "" {
-		return errors.New("domain cannot be empty")
+	if token, ok := ctx.Get("token"); !ok {
+		color.Red("token not set in argument list")
+
+		return cmd, errors.New("token not set")
+	} else {
+		cmd.Token = token
 	}
 
-	if argv.Token == "" {
-		return errors.New("token cannot be empty")
+	if domain, ok := ctx.Get("domain"); !ok {
+		color.Red("email not set in argument list")
+
+		return cmd, errors.New("email not set")
+	} else {
+		cmd.Domain = domain
 	}
 
-	return nil
+	return cmd, nil
 }
 
 func validEmail(email string) bool {
@@ -57,10 +97,31 @@ func validEmail(email string) bool {
 //
 // The login command first initializes an jira api client, verifies
 // the credentials and saves them to the keyring
-func ExecuteLoginCommand(ctx *cli.Context) error {
-	arguments := ctx.Argv().(*loginCommand)
+func HandleLoginCommand(ctx climax.Context) int {
+	arguments, err := LoginCommandFromCliCtx(ctx)
+	if err != nil {
+		return 1
+	}
 
 	client := jira.InitializeApiFromInit(arguments.Email, arguments.Domain, arguments.Token)
 
-	return client.SaveToKeyring(keyRingService, keyRingUser)
+	user, err := client.GetCurrentUser()
+	if err != nil {
+		if errors.Is(err, jira.ErrUnauthorized) {
+			color.Red("Invalid credentials")
+		} else {
+			color.Red("Unknown error")
+		}
+
+		return 1
+	}
+
+	err = client.SaveToKeyring(keyRingService, keyRingUser)
+	if err != nil {
+		color.Red("Credentials valid, but could not be saved to keyring")
+		return 1
+	}
+
+	color.Green(fmt.Sprintf("Authenticated successfully as %s (%s)", user.DisplayName, user.EmailAddress))
+	return 0
 }
