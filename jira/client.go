@@ -8,11 +8,13 @@ import (
 )
 
 type jiraClient struct {
-	BaseUrl string `json:"url"`
+	BaseURL string `json:"url"`
 	Email   string `json:"email"`
 	Token   string `json:"token"`
 
 	apiPath string
+
+	B Backend
 }
 
 type JiraClient interface {
@@ -24,11 +26,15 @@ type JiraClient interface {
 // InitializeApiFromInit returns a new instance of JiraClient based on the
 // passed init command values.
 func InitializeApiFromInit(email, domain, token string) JiraClient {
+	url := buildBaseUrl(domain)
+	b := NewBackend(url)
+
 	return &jiraClient{
 		Email:   email,
-		BaseUrl: buildBaseUrl(domain),
+		BaseURL: url,
 		Token:   token,
 		apiPath: "rest/api/3/",
+		B:       b,
 	}
 }
 
