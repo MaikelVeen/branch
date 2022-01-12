@@ -9,6 +9,7 @@ import (
 )
 
 var ErrUnauthorized = errors.New("received 401")
+var ErrNotFound = errors.New("received 404")
 
 type jiraClient struct {
 	BaseURL string `json:"url"`
@@ -24,6 +25,7 @@ type JiraClient interface {
 	SaveToKeyring(service, user string) error
 
 	MyselfResource
+	IssueResource
 }
 
 // InitializeApiFromInit returns a new instance of JiraClient based on the

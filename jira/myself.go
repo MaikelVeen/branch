@@ -12,6 +12,19 @@ type MyselfResource interface {
 	GetCurrentUser() (User, error)
 }
 
+func (c *jiraClient) GetCurrentUser() (User, error) {
+	user := User{}
+
+	resp, err := c.B.Call(http.MethodGet, "rest/api/3/myself", c.Email, c.Token, nil, &user)
+	if err != nil {
+		if resp.StatusCode == http.StatusUnauthorized {
+			return user, ErrUnauthorized
+		}
+	}
+
+	return user, nil
+}
+
 func UnmarshalUser(data []byte) (User, error) {
 	var r User
 	err := json.Unmarshal(data, &r)
@@ -83,17 +96,4 @@ type Groups struct {
 type GroupsItem struct {
 	Name string `json:"name"`
 	Self string `json:"self"`
-}
-
-func (c *jiraClient) GetCurrentUser() (User, error) {
-	User := User{}
-
-	resp, err := c.B.Call(http.MethodGet, "rest/api/3/myself", c.Email, c.Token, nil, &User)
-	if err != nil {
-		if resp.StatusCode == http.StatusUnauthorized {
-			return User, ErrUnauthorized
-		}
-	}
-
-	return User, nil
 }
