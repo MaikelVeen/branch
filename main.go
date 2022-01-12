@@ -10,5 +10,6 @@ func main() {
 	cli.Version = "stable"
 
 	cli.AddCommand(GetLoginCommand())
+	cli.AddCommand(GetBranchCommand())
 	cli.Run()
 }
