@@ -15,7 +15,7 @@ type IssueResource interface {
 func (c *jiraClient) GetIssue(key string) (IssueBean, error) {
 	issue := IssueBean{}
 
-	path := fmt.Sprintf("rest/api/3/issues/%s", key)
+	path := fmt.Sprintf("rest/api/3/issue/%s", key)
 	resp, err := c.B.Call(http.MethodGet, path, c.Email, c.Token, nil, &issue)
 	if err != nil {
 		if resp.StatusCode == http.StatusUnauthorized {

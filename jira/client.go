@@ -16,7 +16,7 @@ type jiraClient struct {
 	Email   string `json:"email"`
 	Token   string `json:"token"`
 
-	B Backend
+	B Backend `json:"-"`
 }
 
 type JiraClient interface {
@@ -60,6 +60,8 @@ func NewJiraApi(service, user string) (JiraClient, error) {
 	if err != nil {
 		return client, err
 	}
+
+	client.B = NewBackend(client.BaseURL)
 
 	return client, nil
 }

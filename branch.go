@@ -41,6 +41,7 @@ func HandleBranchCommand(ctx climax.Context) int {
 	client, err := jira.NewJiraApi(keyRingService, keyRingUser)
 	if err != nil {
 		color.Red("Could not instantiate jira api client")
+		color.Red(err.Error())
 		return 1
 	}
 
@@ -80,7 +81,18 @@ func HandleBranchCommand(ctx climax.Context) int {
 	}
 
 	branchName := GetBranchNameFromIssue(issue)
-	color.Green(branchName)
+
+	if err := ExecBranch(branchName); err != nil {
+		color.Red("Could not create branch %s", branchName)
+		return 1
+	}
+
+	if err := ExecCheckout(branchName); err != nil {
+		color.Red("Could not checkout %s", branchName)
+		return 1
+	}
+
+	color.Green("created and switched to %s", branchName)
 
 	return 0
 }
@@ -111,6 +123,16 @@ func ExecBranchCheck() (bool, error) {
 	return true, err
 }
 
+func ExecBranch(branch string) error {
+	cmd := exec.Command("git", "branch", branch)
+	return cmd.Run()
+}
+
+func ExecCheckout(branch string) error {
+	cmd := exec.Command("git", "checkout", branch)
+	return cmd.Run()
+}
+
 // ExecCleanTreeCheck returns an error when the user does
 // not have a clean working tree.
 func ExecCleanTreeCheck() error {
@@ -122,8 +144,10 @@ func GetBranchNameFromIssue(issue jira.IssueBean) string {
 	base := getBranchBase(issue)
 
 	parts := strings.Split(strings.ToLower(issue.Fields.Summary), " ")
-	hyphenated := strings.Join(parts[:12], "-")
+	// TODO: limit to ~12 entries
+	hyphenated := strings.Join(parts, "-")
 
+	// TODO: check if string would be a valid branch name
 	return base + hyphenated
 }
 
