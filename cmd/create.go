@@ -1,6 +1,6 @@
 package cmd
 
-import (
+/*import (
 	"errors"
 	"os/exec"
 	"regexp"
@@ -180,3 +180,4 @@ func getBranchBase(issue jira.IssueBean) string {
 
 	return "feature/"
 }
+*/

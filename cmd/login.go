@@ -125,3 +125,7 @@ func HandleLoginCommand(ctx climax.Context) int {
 	color.Green(fmt.Sprintf("Authenticated successfully as %s (%s)", user.DisplayName, user.EmailAddress))
 	return 0
 }
+
+func ExecuteLoginCommand(ctx climax.Context) int {
+	return 0
+}
