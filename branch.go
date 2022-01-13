@@ -129,6 +129,7 @@ func ExecBranchCheck() (bool, error) {
 	return true, err
 }
 
+// TODO: check if the branch already exists
 func ExecBranch(branch string) error {
 	cmd := exec.Command("git", "branch", branch)
 	return cmd.Run()
