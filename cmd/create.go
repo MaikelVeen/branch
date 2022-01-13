@@ -3,12 +3,17 @@ package cmd
 import (
 	"errors"
 	"os/exec"
+	"strings"
 
 	"github.com/MaikelVeen/branch/git"
 	"github.com/MaikelVeen/branch/printer"
+	"github.com/MaikelVeen/branch/prompt"
 	"github.com/MaikelVeen/branch/ticket"
 	"github.com/tucnak/climax"
 )
+
+// TODO: make this configurable
+const baseBranch = "develop"
 
 func GetCreateCommand() climax.Command {
 	return climax.Command{
@@ -42,13 +47,21 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 		return 1
 	}
 
+	g := git.NewGitGitCommander()
+
 	// Check the preconditions.
-	err = checkPreconditions(key, git.NewGitGitCommander(), system)
+	err = checkPreconditions(key, g, system)
 	if err != nil {
 		printer.Warning(err.Error())
 	}
 
 	printer.Print("Key is valid and working from a clean tree")
+
+	err = checkBaseBranch(g, baseBranch)
+	if err != nil {
+		printer.Error(nil, err)
+	}
+
 	return 0
 }
 
@@ -81,6 +94,33 @@ func checkPreconditions(key string, g git.GitCommander, s ticket.TicketSystem) e
 
 	if err := g.ExecuteDiffIndex(exec.Command, "HEAD"); err != nil {
 		return errors.New("Working tree is not clean, aborting...")
+	}
+
+	return nil
+}
+
+// checkBaseBranch checks if the configured base branch is currently
+// set and ask if the user wants to switch if that is not the case.
+func checkBaseBranch(g git.GitCommander, base string) error {
+	b, err := g.ExecuteShortSymbolicRef(exec.Command)
+	if err != nil {
+		return err
+	}
+
+	if b != base {
+		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{"You are not on the develop branch"})
+		val, err := switchPrompt.Run()
+		if err != nil {
+			return err
+		}
+
+		s := strings.ToLower(strings.TrimSpace(val))[0] == 'y'
+		if s {
+			err := g.ExecuteCheckout(exec.Command, base)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
