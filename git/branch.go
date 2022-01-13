@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// filter will clean `s` to be a valid part of a git branch
-func filter(s string) string {
+// Filter will clean `s` to be a valid part of a git branch.
+func Filter(s string) string {
 	// Remove everything inside () and [] to remove tags.
 	innerValRe, _ := regexp.Compile(`([\(\[]).*?([\)\]])`)
 	s = innerValRe.ReplaceAllString(s, "")
@@ -22,7 +22,7 @@ func filter(s string) string {
 
 	// Remove double spaces
 	d, _ := regexp.Compile(`\s\s+`)
-	s = d.ReplaceAllString(s, "")
+	s = d.ReplaceAllString(s, " ")
 
 	// Split the string on the spaces.
 	parts := strings.Split(s, " ")
@@ -43,7 +43,7 @@ func getMax(p []string) int {
 }
 
 func GetBranchName(key, base, title string) string {
-	cleanTitle := filter(title)
+	cleanTitle := Filter(title)
 
 	return fmt.Sprintf("%s/%s/%s", base, key, cleanTitle)
 }
