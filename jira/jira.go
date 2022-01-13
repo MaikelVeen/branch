@@ -2,6 +2,7 @@ package jira
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/MaikelVeen/branch/prompt"
 	"github.com/MaikelVeen/branch/ticket"
@@ -49,6 +50,12 @@ func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
 		return tu, err
 	}
 
+	// Save the credentials on the user system.
+	err = j.SaveCredentials()
+	if err != nil {
+		return tu, ticket.ErrCredentialSaving
+	}
+
 	// Populate struct
 	tu.DisplayName = user.DisplayName
 	tu.Email = user.EmailAddress
@@ -60,12 +67,13 @@ func (j *jiraImplemtation) GetTicketName(key string) (string, error) {
 	return "", nil
 }
 
-func (j *jiraImplemtation) LoadCredentials() interface{} {
-	return nil
+func (j *jiraImplemtation) LoadCredentials() (interface{}, error) {
+	return nil, nil
 }
 
-func (j *jiraImplemtation) SaveCredentials() interface{} {
-	return nil
+func (j *jiraImplemtation) SaveCredentials() error {
+	service := fmt.Sprintf("%s.%s", j.KeyService, j.Suffix)
+	return j.client.SaveToKeyring(service, j.KeyUser)
 }
 
 func (j *jiraImplemtation) ValidateKey(key string) error {

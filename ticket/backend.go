@@ -18,8 +18,8 @@ type TicketSystem interface {
 	// The return value interface{} of the returned function represent the login data.
 	GetLoginScenario() LoginScenario
 	GetTicketName(key string) (string, error)
-	LoadCredentials() interface{}
-	SaveCredentials() interface{}
+	LoadCredentials() (interface{}, error)
+	SaveCredentials() error
 	ValidateKey(key string) error
 }
 
