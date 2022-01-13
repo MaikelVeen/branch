@@ -40,4 +40,4 @@ The `i` argument corresponds to the issue key. Please not that your working tree
 
 #### Example
 
-![Example usage](https://github.com/github.com/MaikelVeen/branch/raw/main/example.png "Example usage")
+![Example usage](https://raw.githubusercontent.com/MaikelVeen/branch/main/example.png "Example usage")
