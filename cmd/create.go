@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -108,12 +109,17 @@ func checkBaseBranch(g git.GitCommander, base string) error {
 	}
 
 	if b != base {
-		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{"You are not on the develop branch"})
+		// Construct a confirmation prompt
+		info := fmt.Sprintf("You are not on the %s branch", base)
+		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
+
+		// Run the prompt.
 		val, err := switchPrompt.Run()
 		if err != nil {
 			return err
 		}
 
+		// If return value is yes, checkout base branch.
 		s := strings.ToLower(strings.TrimSpace(val))[0] == 'y'
 		if s {
 			err := g.ExecuteCheckout(exec.Command, base)
