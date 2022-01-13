@@ -1,46 +1,47 @@
 package git
 
-// filter will first remove any values that are between () and [].
-// Then it will filter all the special characters.
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
+
+// filter will apply the following filter to `s`:
+// It will remove trailing whitespace.
+// It will make all chars lowercase.
+// It will first remove any values that are between () and [].
+// It it will filter all the special characters.
 func filter(s string) string {
-	return ""
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+
+	// Remove everything inside () and [] to remove tags
+	innerValRe, _ := regexp.Compile(`([\(\[]).*?([\)\]])`)
+	s = innerValRe.ReplaceAllString(s, "")
+
+	// Remove all non alpha numeric chars expect whitespace
+	special, _ := regexp.Compile(`[^a-zA-Z\d\s:]`)
+	s = special.ReplaceAllString(s, "")
+
+	// Split the string on the spaces.
+	parts := strings.Split(s, " ")
+	cutoff := getMax(parts)
+
+	return strings.Join(parts[:cutoff], "-")
+}
+
+func getMax(p []string) int {
+	l := len(p)
+
+	if l > 12 {
+		return 12
+	}
+
+	return l
 }
 
 func GetBranchName(key, base, title string) string {
-	return ""
+	cleanTitle := filter(title)
+
+	return fmt.Sprintf("%s/%s/%s", base, key, cleanTitle)
 }
-
-/*TODO: this function needs some love
-func GetBranchNameFromIssue(issue jira.IssueBean) (string, error) {
-	base := getBranchBase(issue)
-
-	// TODO trim whitespace on end.
-	filtered, err := removeSpecialChars(issue.Fields.Summary)
-	if err != nil {
-		return "", err
-	}
-
-	parts := strings.Split(strings.ToLower(filtered), " ") // TODO: limit to ~12 entries
-	hyphenated := strings.Join(parts, "-")
-
-	// TODO: check if string would be a valid branch name
-	return base + issue.Key + "-" + hyphenated, nil
-}
-
-func removeSpecialChars(s string) (string, error) {
-	re, err := regexp.Compile(`[^\w!(-\/_ )]`)
-	if err != nil {
-		return "", nil
-	}
-
-	return re.ReplaceAllString(s, ""), nil
-}
-
-func getBranchBase(issue jira.IssueBean) string {
-	if StringInSliceCaseInsensitive(issue.Fields.Issuetype.Name, []string{"bug"}) {
-		return "hotfix/"
-	}
-
-	return "feature/"
-}
-*/

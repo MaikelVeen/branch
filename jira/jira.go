@@ -3,6 +3,7 @@ package jira
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/MaikelVeen/branch/prompt"
 	"github.com/MaikelVeen/branch/ticket"
@@ -100,6 +101,17 @@ func (j *jiraImplemtation) GetTicket(key string) (ticket.Ticket, error) {
 		Type:  issue.Fields.Issuetype.Name,
 		Key:   issue.Key,
 	}, nil
+}
+
+func (j *jiraImplemtation) GetBaseFromTicketType(typ string) string {
+	// TODO: define defaults in git package
+	for _, sliceItem := range []string{"bug"} {
+		if strings.EqualFold(typ, sliceItem) {
+			return "hotfix"
+		}
+	}
+
+	return "feature"
 }
 
 func (j *jiraImplemtation) SaveCredentials() error {

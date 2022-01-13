@@ -24,6 +24,7 @@ type TicketSystem interface {
 	// The return value interface{} of the returned function represent the login data.
 	GetLoginScenario() LoginScenario
 	GetTicket(key string) (Ticket, error)
+	GetBaseFromTicketType(typ string) string
 	SaveCredentials() error
 	ValidateKey(key string) error
 }
