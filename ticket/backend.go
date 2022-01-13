@@ -24,7 +24,6 @@ type TicketSystem interface {
 	// The return value interface{} of the returned function represent the login data.
 	GetLoginScenario() LoginScenario
 	GetTicketName(key string) (string, error)
-	LoadCredentials() (interface{}, error)
 	SaveCredentials() error
 	ValidateKey(key string) error
 }
@@ -63,4 +62,28 @@ func (u *User) SaveToDisk() error {
 	}
 
 	return f.Sync()
+}
+
+// LoadFromDisk reads the user from the home dir.
+func LoadFromDisk() (*User, error) {
+	u := &User{}
+
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		return u, err
+	}
+
+	filename := fmt.Sprintf("%s/.branch-cli", dirname)
+
+	dat, err := os.ReadFile(filename)
+	if err != nil {
+		return u, err
+	}
+
+	err = json.Unmarshal(dat, u)
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }

@@ -1,5 +1,91 @@
 package cmd
 
+import (
+	"errors"
+	"os/exec"
+
+	"github.com/MaikelVeen/branch/git"
+	"github.com/MaikelVeen/branch/printer"
+	"github.com/MaikelVeen/branch/ticket"
+	"github.com/tucnak/climax"
+)
+
+func GetCreateCommand() climax.Command {
+	return climax.Command{
+		Name:  "c",
+		Brief: "creates a new branch based on a ticket",
+
+		Flags: []climax.Flag{
+			{
+				Name:     "key",
+				Short:    "k",
+				Usage:    `--key="."`,
+				Help:     `The key/id of the ticket`,
+				Variable: true,
+			},
+		},
+		Handle: ExecuteCreateCommand,
+	}
+}
+
+func ExecuteCreateCommand(ctx climax.Context) int {
+	key, ok := ctx.Get("key")
+	if !ok {
+		printer.Warning("--key --k flag is not optional, example -k=abc-123")
+		return 1
+	}
+
+	// Get an authenticated ticket system.
+	system, err := getSystem()
+	if err != nil {
+		printer.Error(nil, err)
+		return 1
+	}
+
+	// Check the preconditions.
+	err = checkPreconditions(key, git.NewGitGitCommander(), system)
+	if err != nil {
+		printer.Warning(err.Error())
+	}
+
+	printer.Greet("preconditions checked out")
+	return 0
+}
+
+// getSystem returns a ticket system based on the local saved user.
+func getSystem() (ticket.TicketSystem, error) {
+	// Load the current user from the disk.
+	u, err := ticket.LoadFromDisk()
+	if err != nil {
+		return nil, err
+	}
+
+	system, err := GetAuthenticatedTicketSystem(u.System)
+	if err != nil {
+		return nil, err
+	}
+
+	return system, nil
+}
+
+// checkPreconditions returns an error when one of the following checks fails:
+// validity of the key, in git repo and working tree clean.
+func checkPreconditions(key string, g git.GitCommander, s ticket.TicketSystem) error {
+	if err := s.ValidateKey(key); err != nil {
+		return err
+	}
+
+	if err := g.ExecuteStatus(exec.Command); err != nil {
+		return errors.New("Checking git status failed, are you in a git repo?")
+	}
+
+	if err := g.ExecuteDiffIndex(exec.Command, "HEAD"); err != nil {
+		return errors.New("Working tree is not clean, aborting...")
+	}
+
+	return nil
+}
+
 /*import (
 	"errors"
 	"os/exec"

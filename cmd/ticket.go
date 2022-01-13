@@ -17,11 +17,11 @@ func GetNewTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
 	return nil
 }
 
-func GetAuthenticatedTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
+func GetAuthenticatedTicketSystem(s ticket.SupportedTicketSystem) (ticket.TicketSystem, error) {
 	switch s {
 	case ticket.Jira:
-		return jira.NewJira(keyRingService, keyRingUser)
+		return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
 	}
 
-	return nil
+	return nil, nil
 }

@@ -24,6 +24,24 @@ func NewJira(service, user string) ticket.TicketSystem {
 	}
 }
 
+func NewAuthenticatedJira(service, user string) (ticket.TicketSystem, error) {
+	j := &jiraImplemtation{
+		KeyService: service,
+		KeyUser:    user,
+		Suffix:     "jira",
+	}
+
+	s := fmt.Sprintf("%s.%s", j.KeyService, j.Suffix)
+	c, err := NewJiraClient(s, j.KeyUser)
+	if err != nil {
+		return nil, err
+	}
+
+	j.client = c
+
+	return j, nil
+}
+
 type JiraCredentials struct {
 	Email  string
 	Token  string
@@ -67,10 +85,6 @@ func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
 
 func (j *jiraImplemtation) GetTicketName(key string) (string, error) {
 	return "", nil
-}
-
-func (j *jiraImplemtation) LoadCredentials() (interface{}, error) {
-	return nil, nil
 }
 
 func (j *jiraImplemtation) SaveCredentials() error {

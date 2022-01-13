@@ -46,9 +46,9 @@ func buildBaseUrl(domain string) string {
 	return fmt.Sprintf("https://%s.atlassian.net/", domain)
 }
 
-// NewJiraApi returns a new instance of JiraApi with credentials
+// NewJiraClient returns a new instance of JiraApi with credentials
 // gathered from the local keyring.
-func NewJiraApi(service, user string) (JiraClient, error) {
+func NewJiraClient(service, user string) (JiraClient, error) {
 	client := &jiraClient{}
 
 	creds, err := keyring.Get(service, user)
