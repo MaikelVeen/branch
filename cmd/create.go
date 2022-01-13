@@ -48,7 +48,7 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 		printer.Warning(err.Error())
 	}
 
-	printer.Greet("preconditions checked out")
+	printer.Print("Key is valid and working from a clean tree")
 	return 0
 }
 
