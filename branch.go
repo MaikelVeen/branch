@@ -151,6 +151,7 @@ func ExecCleanTreeCheck() error {
 func GetBranchNameFromIssue(issue jira.IssueBean) (string, error) {
 	base := getBranchBase(issue)
 
+	// TODO trim whitespace on end.
 	filtered, err := removeSpecialChars(issue.Fields.Summary)
 	if err != nil {
 		return "", err
