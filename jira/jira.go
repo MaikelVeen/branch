@@ -31,7 +31,9 @@ type JiraCredentials struct {
 }
 
 func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
-	tu := ticket.User{}
+	tu := ticket.User{
+		System: ticket.Jira,
+	}
 
 	// Type assert passed interface.
 	creds, ok := data.(JiraCredentials)

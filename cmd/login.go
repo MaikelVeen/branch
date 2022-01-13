@@ -34,7 +34,7 @@ func ExecuteLoginCommand(ctx climax.Context) int {
 		return 1
 	}
 
-	system := GetTicketSystem(systemType)
+	system := GetNewTicketSystem(systemType)
 	loginScenario := system.GetLoginScenario()
 
 	i := 3
@@ -59,6 +59,12 @@ func ExecuteLoginCommand(ctx climax.Context) int {
 
 			i--
 			continue
+		}
+
+		err = user.SaveToDisk()
+		if err != nil {
+			printer.Error(nil, err)
+			return 1
 		}
 
 		printer.Success(fmt.Sprintf("Authenticated successfully as %s (%s)", user.DisplayName, user.Email))

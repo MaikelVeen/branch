@@ -8,7 +8,16 @@ import (
 const keyRingService = "branch-cli"
 const keyRingUser = "branch-cli-anon"
 
-func GetTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
+func GetNewTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
+	switch s {
+	case ticket.Jira:
+		return jira.NewJira(keyRingService, keyRingUser)
+	}
+
+	return nil
+}
+
+func GetAuthenticatedTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
 	switch s {
 	case ticket.Jira:
 		return jira.NewJira(keyRingService, keyRingUser)
