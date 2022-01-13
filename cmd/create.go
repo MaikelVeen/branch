@@ -68,7 +68,7 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 		printer.Error(nil, err)
 	}
 
-	branch := git.GetBranchName(ticket.Key, baseBranch, system.GetBaseFromTicketType(ticket.Type))
+	branch := git.GetBranchName(ticket.Key, system.GetBaseFromTicketType(ticket.Type), ticket.Title)
 	printer.Success(branch)
 
 	return 0
