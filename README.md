@@ -1,6 +1,15 @@
+ ________      ________      ________      ________       ________      ___  ___     
+|\   __  \    |\   __  \    |\   __  \    |\   ___  \    |\   ____\    |\  \|\  \    
+\ \  \|\ /_   \ \  \|\  \   \ \  \|\  \   \ \  \\ \  \   \ \  \___|    \ \  \\\  \   
+ \ \   __  \   \ \   _  _\   \ \   __  \   \ \  \\ \  \   \ \  \        \ \   __  \  
+  \ \  \|\  \   \ \  \\  \|   \ \  \ \  \   \ \  \\ \  \   \ \  \____    \ \  \ \  \ 
+   \ \_______\   \ \__\\ _\    \ \__\ \__\   \ \__\\ \__\   \ \_______\   \ \__\ \__\
+    \|_______|    \|__|\|__|    \|__|\|__|    \|__| \|__|    \|_______|    \|__|\|__|
+                                                                                     
+---
 # branch
 
-branch is a small CLI tool to automatically create git branches based on JIRA issues.
+branch is a small CLI tool to automatically create git branches based on tickets from issue/tickets systems like Jira.
 
 ## Installation
 
