@@ -8,7 +8,13 @@ func NewJira() ticket.TicketSystem {
 	return &jiraImplemtation{}
 }
 
-func (j *jiraImplemtation) Authenticate(username, password string) error {
+type JiraCredentials struct {
+	Email  string
+	Token  string
+	Domain string
+}
+
+func (j *jiraImplemtation) Authenticate(interface{}) error {
 	return nil
 }
 
@@ -25,5 +31,9 @@ func (j *jiraImplemtation) SaveCredentials(s, u string) interface{} {
 }
 
 func (j *jiraImplemtation) ValidateKey(key string) error {
+	return nil
+}
+
+func (j *jiraImplemtation) GetLoginScenario() ticket.LoginScenario {
 	return nil
 }

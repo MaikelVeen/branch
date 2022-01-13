@@ -4,12 +4,15 @@
 package ticket
 
 type TicketSystem interface {
-	Authenticate(username, password string) error
+	Authenticate(data interface{}) error
 	GetTicketName(key string) (string, error)
 	LoadCredentials(s, u string) interface{}
 	SaveCredentials(s, u string) interface{}
 	ValidateKey(key string) error
+	GetLoginScenario() LoginScenario
 }
+
+type LoginScenario func() (interface{}, error)
 
 type SupportedTicketSystem string
 
@@ -18,3 +21,5 @@ const Jira SupportedTicketSystem = "jira"
 func GetTicketSystem(s SupportedTicketSystem) TicketSystem {
 	return nil
 }
+
+var SupportedTicketSystems []string = []string{string(Jira)}
