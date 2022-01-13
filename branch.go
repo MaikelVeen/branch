@@ -163,7 +163,7 @@ func GetBranchNameFromIssue(issue jira.IssueBean) (string, error) {
 }
 
 func removeSpecialChars(s string) (string, error) {
-	re, err := regexp.Compile(`[^\w!(-\/_)]`)
+	re, err := regexp.Compile(`[^\w!(-\/_ )]`)
 	if err != nil {
 		return "", nil
 	}
