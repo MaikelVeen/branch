@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/tucnak/climax"
+
+	"github.com/MaikelVeen/branch/cmd"
 )
 
 func main() {
@@ -9,7 +11,7 @@ func main() {
 	cli.Brief = ""
 	cli.Version = "stable"
 
-	cli.AddCommand(GetLoginCommand())
-	cli.AddCommand(GetBranchCommand())
+	cli.AddCommand(cmd.GetLoginCommand())
+	cli.AddCommand(cmd.GetBranchCommand())
 	cli.Run()
 }

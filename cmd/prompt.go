@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-// UserConfirmation displays a prompt `s` to the user and returns a bool indicating yes / no
+// PromptConfirmation displays a prompt `s` to the user and returns a bool indicating yes / no
 // If the lowercased, trimmed input begins with anything other than 'y', it returns false
 // It accepts an int `tries` representing the number of attempts before returning false
-func UserConfirmation(s string, tries int) bool {
+func PromptConfirmation(s string, tries int) bool {
 	r := bufio.NewReader(os.Stdin)
 
 	for ; tries > 0; tries-- {
@@ -33,6 +33,7 @@ func UserConfirmation(s string, tries int) bool {
 	return false
 }
 
+// Temp add here:
 // StringInSliceCaseInsensitive checks whether a string exists in a slice.
 func StringInSliceCaseInsensitive(str string, slice []string) bool {
 	for _, sliceItem := range slice {
