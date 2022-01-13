@@ -161,7 +161,7 @@ func GetBranchNameFromIssue(issue jira.IssueBean) (string, error) {
 	hyphenated := strings.Join(parts, "-")
 
 	// TODO: check if string would be a valid branch name
-	return base + hyphenated, nil
+	return base + issue.ID + "-" + hyphenated, nil
 }
 
 func removeSpecialChars(s string) (string, error) {
