@@ -37,3 +37,7 @@ branch n -i=key
 ```
 
 The `i` argument corresponds to the issue key. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
+
+#### Example
+
+![Example usage](https://github.com/github.com/MaikelVeen/branch/raw/main/example.png "Example usage")
