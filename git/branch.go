@@ -6,27 +6,29 @@ import (
 	"strings"
 )
 
-// filter will apply the following filter to `s`:
-// It will remove trailing whitespace.
-// It will make all chars lowercase.
-// It will first remove any values that are between () and [].
-// It it will filter all the special characters.
+// filter will clean `s` to be a valid part of a git branch
 func filter(s string) string {
-	s = strings.TrimSpace(s)
-	s = strings.ToLower(s)
-
-	// Remove everything inside () and [] to remove tags
+	// Remove everything inside () and [] to remove tags.
 	innerValRe, _ := regexp.Compile(`([\(\[]).*?([\)\]])`)
 	s = innerValRe.ReplaceAllString(s, "")
 
-	// Remove all non alpha numeric chars expect whitespace
+	// Remove all non alpha numeric chars expect whitespace.
 	special, _ := regexp.Compile(`[^a-zA-Z\d\s:]`)
 	s = special.ReplaceAllString(s, "")
+
+	// Remove leading and trailing whitespace.
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+
+	// Remove double spaces
+	d, _ := regexp.Compile(`\s\s+`)
+	s = d.ReplaceAllString(s, "")
 
 	// Split the string on the spaces.
 	parts := strings.Split(s, " ")
 	cutoff := getMax(parts)
 
+	// Return hyphenated string
 	return strings.Join(parts[:cutoff], "-")
 }
 
