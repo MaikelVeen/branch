@@ -14,7 +14,7 @@ func Filter(s string) string {
 
 	// Remove all non alpha numeric chars expect whitespace.
 	special, _ := regexp.Compile(`[^a-zA-Z\d\s]`)
-	s = special.ReplaceAllString(s, "-")
+	s = special.ReplaceAllString(s, " ")
 
 	// Remove leading and trailing whitespace.
 	s = strings.TrimSpace(s)
