@@ -20,7 +20,7 @@ To use the tool you first have to authenticate with Jira. You need the following
 
 - Email
 - Domain of your Jira
-- API Token (Learn more (here)[https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/])
+- API Token (Learn more [here](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/))
 
 Once you have gathered these inputs, you can run the following command:
 

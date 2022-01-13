@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/MaikelVeen/branch/jira"
@@ -80,7 +81,11 @@ func HandleBranchCommand(ctx climax.Context) int {
 		}
 	}
 
-	branchName := GetBranchNameFromIssue(issue)
+	branchName, err := GetBranchNameFromIssue(issue)
+	if err != nil {
+		color.Red("Could not build branch name")
+		return 1
+	}
 
 	if err := ExecBranch(branchName); err != nil {
 		color.Red("Could not create branch %s", branchName)
@@ -115,6 +120,7 @@ func ExecBranchCheck() (bool, error) {
 	branch := string(out)
 	if branch != "develop" {
 		color.Yellow("You are currently not on the develop branch")
+		// TODO: Do not ask to continue but to switch.
 		c := UserConfirmation("Do you wish to continue?", 2)
 
 		return c, err
@@ -140,15 +146,29 @@ func ExecCleanTreeCheck() error {
 	return cmd.Run()
 }
 
-func GetBranchNameFromIssue(issue jira.IssueBean) string {
+//TODO: this function needs some love
+func GetBranchNameFromIssue(issue jira.IssueBean) (string, error) {
 	base := getBranchBase(issue)
 
-	parts := strings.Split(strings.ToLower(issue.Fields.Summary), " ")
-	// TODO: limit to ~12 entries
+	filtered, err := removeSpecialChars(issue.Fields.Summary)
+	if err != nil {
+		return "", err
+	}
+
+	parts := strings.Split(strings.ToLower(filtered), " ") // TODO: limit to ~12 entries
 	hyphenated := strings.Join(parts, "-")
 
 	// TODO: check if string would be a valid branch name
-	return base + hyphenated
+	return base + hyphenated, nil
+}
+
+func removeSpecialChars(s string) (string, error) {
+	re, err := regexp.Compile(`[^\w!(-\/_)]`)
+	if err != nil {
+		return "", nil
+	}
+
+	return re.ReplaceAllString(s, ""), nil
 }
 
 func getBranchBase(issue jira.IssueBean) string {
