@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-var greetColor = color.New(color.FgHiMagenta, color.Bold, color.Underline)
+var greetColor = color.New(color.FgHiGreen, color.Bold, color.Underline)
 
 func Error(msg *string, err error) {
 	var message string

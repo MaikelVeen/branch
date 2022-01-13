@@ -3,23 +3,29 @@
 // backend.
 package ticket
 
-type TicketSystem interface {
-	Authenticate(data interface{}) error
-	GetTicketName(key string) (string, error)
-	LoadCredentials(s, u string) interface{}
-	SaveCredentials(s, u string) interface{}
-	ValidateKey(key string) error
-	GetLoginScenario() LoginScenario
-}
-
-type LoginScenario func() (interface{}, error)
-
+// SupportedTicketSystem represent an identifier for a ticket system.
 type SupportedTicketSystem string
 
 const Jira SupportedTicketSystem = "jira"
 
-func GetTicketSystem(s SupportedTicketSystem) TicketSystem {
-	return nil
+// SupportedTicketSystems represent the systems that are currently supported by the tool.
+var SupportedTicketSystems []string = []string{string(Jira)}
+
+type TicketSystem interface {
+	Authenticate(data interface{}) (User, error)
+	// GetLoginScenario returns a function that will execute a number of prompts
+	// to gather the credentials needed to authenticate with the system.
+	// The return value interface{} of the returned function represent the login data.
+	GetLoginScenario() LoginScenario
+	GetTicketName(key string) (string, error)
+	LoadCredentials() interface{}
+	SaveCredentials() interface{}
+	ValidateKey(key string) error
 }
 
-var SupportedTicketSystems []string = []string{string(Jira)}
+type LoginScenario func() (interface{}, error)
+
+type User struct {
+	DisplayName string
+	Email       string
+}
