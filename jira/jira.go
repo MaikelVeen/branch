@@ -83,8 +83,23 @@ func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
 	return tu, nil
 }
 
-func (j *jiraImplemtation) GetTicketName(key string) (string, error) {
-	return "", nil
+func (j *jiraImplemtation) GetTicket(key string) (ticket.Ticket, error) {
+	issue, err := j.client.GetIssue(key)
+	if err != nil {
+		if errors.Is(err, ErrUnauthorized) {
+			return ticket.Ticket{}, ticket.ErrNotUnauthorized
+		}
+
+		if errors.Is(err, ErrNotFound) {
+			return ticket.Ticket{}, ticket.ErrNotFound
+		}
+	}
+
+	return ticket.Ticket{
+		Title: issue.Fields.Summary,
+		Type:  issue.Fields.Issuetype.Name,
+		Key:   issue.Key,
+	}, nil
 }
 
 func (j *jiraImplemtation) SaveCredentials() error {
@@ -93,6 +108,8 @@ func (j *jiraImplemtation) SaveCredentials() error {
 }
 
 func (j *jiraImplemtation) ValidateKey(key string) error {
+	// TODO: Implement key checking
+	// https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/
 	return nil
 }
 

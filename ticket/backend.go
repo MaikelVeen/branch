@@ -23,7 +23,7 @@ type TicketSystem interface {
 	// to gather the credentials needed to authenticate with the system.
 	// The return value interface{} of the returned function represent the login data.
 	GetLoginScenario() LoginScenario
-	GetTicketName(key string) (string, error)
+	GetTicket(key string) (Ticket, error)
 	SaveCredentials() error
 	ValidateKey(key string) error
 }
@@ -34,6 +34,12 @@ type User struct {
 	DisplayName string
 	Email       string
 	System      SupportedTicketSystem
+}
+
+type Ticket struct {
+	Title string
+	Key   string
+	Type  string
 }
 
 // SaveToDisk dumps the current user to the file system
