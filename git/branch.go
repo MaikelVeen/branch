@@ -6,8 +6,12 @@ import (
 	"strings"
 )
 
-// Filter will clean `s` to be a valid part of a git branch.
-func Filter(s string) string {
+// FormatAsValidRef transforms `s` to a string that is a valid refname
+//
+// A reference is used in git to specify branches and tags. The following rules
+// must be followed when is comes to naming references:
+// https://git-scm.com/docs/git-check-ref-format
+func FormatAsValidRef(s string) string {
 	// Remove everything inside () and [] to remove tags.
 	innerValRe, _ := regexp.Compile(`([\(\[]).*?([\)\]])`)
 	s = innerValRe.ReplaceAllString(s, "")
@@ -20,30 +24,31 @@ func Filter(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.ToLower(s)
 
-	// Remove double spaces
+	// Remove spaces with single space.
 	d, _ := regexp.Compile(`\s\s+`)
 	s = d.ReplaceAllString(s, " ")
 
 	// Split the string on the spaces.
 	parts := strings.Split(s, " ")
-	cutoff := getMax(parts)
+	cutoff := GetLengthWithUpperbound(parts, 12)
 
 	// Return hyphenated string
 	return strings.Join(parts[:cutoff], "-")
 }
 
-func getMax(p []string) int {
-	l := len(p)
+func GetLengthWithUpperbound(s []string, m int) int {
+	l := len(s)
 
-	if l > 12 {
-		return 12
+	if l > m {
+		return m
 	}
 
 	return l
 }
 
-func GetBranchName(key, base, title string) string {
-	cleanTitle := Filter(title)
+func GetBranchName(base, key, title string) string {
+	//TODO: should we check key and base here to also valid for refname?
+	ref := FormatAsValidRef(title)
 
-	return fmt.Sprintf("%s/%s/%s", base, key, cleanTitle)
+	return fmt.Sprintf("%s/%s/%s", base, key, ref)
 }

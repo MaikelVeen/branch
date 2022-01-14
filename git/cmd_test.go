@@ -15,6 +15,7 @@ import (
 )
 
 func TestExecuteStatus(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
@@ -33,6 +34,7 @@ func TestExecuteStatus(t *testing.T) {
 }
 
 func TestExecuteBranch(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 	b := "feature"
 
@@ -56,6 +58,7 @@ func TestExecuteBranch(t *testing.T) {
 }
 
 func TestExecuteCheckout(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 	b := "feature"
 
@@ -79,6 +82,7 @@ func TestExecuteCheckout(t *testing.T) {
 }
 
 func TestExecuteDiffIndex(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 	b := "HEAD"
 
@@ -102,6 +106,7 @@ func TestExecuteDiffIndex(t *testing.T) {
 }
 
 func TestExecuteShowRef(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 	b := "feature"
 
@@ -125,6 +130,7 @@ func TestExecuteShowRef(t *testing.T) {
 }
 
 func TestExecuteShortSymbolicRef(t *testing.T) {
+	t.Parallel()
 	cmd := NewGitGitCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
