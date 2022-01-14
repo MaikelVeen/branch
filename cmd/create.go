@@ -75,6 +75,8 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 		printer.Error(nil, err)
 	}
 
+	printer.Success(fmt.Sprintf("checked out %s", branch))
+
 	return 0
 }
 
