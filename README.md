@@ -22,7 +22,7 @@ go install
 
 The `go install` command places the executable into the $GOPATH/bin directory. The command will place generated executables into a sub-directory of $GOPATH named bin. So please make sure that this directory is in your `$PATH` environment variable.
 
-## Usage
+# Usage
 
 ```
 branch is a small CLI tool to automatically create git branches based on tickets.
@@ -39,7 +39,7 @@ The commands are:
 Use "branch help [command]" for more information about a command.
 ```
 
-### Authentication
+## Authentication
 
 To use the tool you first have to authenticate with the ticket system. 
 ### Jira 
@@ -56,12 +56,13 @@ Once you have gathered these inputs, you can run the following command and you w
 branch login 
 ```
 
-### Create branch
+---
+## Create a branch
 
-To create a branch based on a Jira issue you can run the following command:
+To create a branch based on a ticket you can run the following command:
 
 ```bash
 branch c -k=key
 ```
 
-The `k` argument corresponds to the issue key. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
+The `k` argument corresponds to the key/identifier of the ticket/issue. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
