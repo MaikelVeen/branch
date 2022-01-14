@@ -4,6 +4,7 @@ package git
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // Git is an interface for executing git commands locally.
@@ -86,5 +87,5 @@ func (g *gitImplemtation) ExecuteShortSymbolicRef(ctx ExecContext) (string, erro
 		return "", err
 	}
 
-	return string(out), nil
+	return strings.TrimSpace(string(out)), nil
 }

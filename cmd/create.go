@@ -123,7 +123,7 @@ func checkBaseBranch(g git.GitCommander, base string) error {
 		return err
 	}
 
-	if b != fmt.Sprintf("refs/head/%s", base) {
+	if b != base {
 		// Construct a confirmation prompt
 		info := fmt.Sprintf("You are not on the %s branch", base)
 		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
