@@ -68,7 +68,8 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 		printer.Error(nil, err)
 	}
 
-	branch := git.GetBranchName(ticket.Key, system.GetBaseFromTicketType(ticket.Type), ticket.Title)
+	base := system.GetBaseFromTicketType(ticket.Type)
+	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
 
 	err = checkoutOrCreateBranch(branch, g)
 	if err != nil {
@@ -122,7 +123,7 @@ func checkBaseBranch(g git.GitCommander, base string) error {
 		return err
 	}
 
-	if b != base {
+	if b != fmt.Sprintf("refs/head/%s", base) {
 		// Construct a confirmation prompt
 		info := fmt.Sprintf("You are not on the %s branch", base)
 		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
