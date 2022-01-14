@@ -1,8 +1,18 @@
-# branch
+```
+ ________      ________      ________      ________       ________      ___  ___     
+|\   __  \    |\   __  \    |\   __  \    |\   ___  \    |\   ____\    |\  \|\  \    
+\ \  \|\ /_   \ \  \|\  \   \ \  \|\  \   \ \  \\ \  \   \ \  \___|    \ \  \\\  \   
+ \ \   __  \   \ \   _  _\   \ \   __  \   \ \  \\ \  \   \ \  \        \ \   __  \  
+  \ \  \|\  \   \ \  \\  \|   \ \  \ \  \   \ \  \\ \  \   \ \  \____    \ \  \ \  \ 
+   \ \_______\   \ \__\\ _\    \ \__\ \__\   \ \__\\ \__\   \ \_______\   \ \__\ \__\
+    \|_______|    \|__|\|__|    \|__|\|__|    \|__| \|__|    \|_______|    \|__|\|__|
+                                                                                     
+```
+---
 
-branch is a small CLI tool to automatically create git branches based on JIRA issues.
+branch is a small CLI tool to automatically create git branches based on tickets from issue/tickets systems like Jira.
 
-## Installation
+# Installation
 
 To install the command line tool, change to the directory of the folder and run the following command:
 
@@ -12,32 +22,47 @@ go install
 
 The `go install` command places the executable into the $GOPATH/bin directory. The command will place generated executables into a sub-directory of $GOPATH named bin. So please make sure that this directory is in your `$PATH` environment variable.
 
-## Usage
+# Usage
 
-### Authentication
+```
+branch is a small CLI tool to automatically create git branches based on tickets.
 
-To use the tool you first have to authenticate with Jira. You need the following to successfully setup the tool:
+Usage:
+
+        branch command [arguments]
+
+The commands are:
+
+        login       authenticates with ticket system
+        c           creates a new branch based on a ticket
+
+Use "branch help [command]" for more information about a command.
+```
+
+## Authentication
+
+To use the tool you first have to authenticate with the ticket system. 
+### Jira 
+
+When using Jira as ticket system you will need to gather the following information:
 
 - Email
 - Domain of your Jira
 - API Token (Learn more [here](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/))
 
-Once you have gathered these inputs, you can run the following command:
+Once you have gathered these inputs, you can run the following command and you will be prompted to enter the information.
 
 ```bash
-branch login -e=youremail@test.com -d=test -t=yourtoken
+branch login 
 ```
 
-### Create branch
+---
+## Create a branch
 
-To create a branch based on a Jira issue you can run the following command:
+To create a branch based on a ticket you can run the following command:
 
 ```bash
-branch n -i=key
+branch c -k=key
 ```
 
-The `i` argument corresponds to the issue key. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
-
-#### Example
-
-![Example usage](https://raw.githubusercontent.com/MaikelVeen/branch/main/example.png "Example usage")
+The `k` argument corresponds to the key/identifier of the ticket/issue. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
