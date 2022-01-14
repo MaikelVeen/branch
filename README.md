@@ -8,11 +8,11 @@
     \|_______|    \|__|\|__|    \|__|\|__|    \|__| \|__|    \|_______|    \|__|\|__|
                                                                                      
 ```
-# branch
+---
 
 branch is a small CLI tool to automatically create git branches based on tickets from issue/tickets systems like Jira.
 
-## Installation
+# Installation
 
 To install the command line tool, change to the directory of the folder and run the following command:
 

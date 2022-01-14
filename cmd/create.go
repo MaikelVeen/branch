@@ -69,7 +69,11 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 	}
 
 	branch := git.GetBranchName(ticket.Key, system.GetBaseFromTicketType(ticket.Type), ticket.Title)
-	printer.Success(branch)
+
+	err = checkoutOrCreateBranch(branch, g)
+	if err != nil {
+		printer.Error(nil, err)
+	}
 
 	return 0
 }
@@ -135,6 +139,35 @@ func checkBaseBranch(g git.GitCommander, base string) error {
 				return fmt.Errorf("Could not checkout the %s branch", base)
 			}
 		}
+	}
+
+	return nil
+}
+
+// checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
+// Then checks if `b` exists, if not creates it and checks it out
+func checkoutOrCreateBranch(b string, g git.GitCommander) error {
+	current, err := g.ExecuteShortSymbolicRef(exec.Command)
+	if err != nil {
+		return err
+	}
+
+	if current == b {
+		return nil
+	}
+
+	err = g.ExecuteShowRef(exec.Command, b)
+	if err != nil {
+		// ShowRef returns error when branch does not exist.
+		err = g.ExecuteBranch(exec.Command, b)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = g.ExecuteCheckout(exec.Command, b)
+	if err != nil {
+		return err
 	}
 
 	return nil
