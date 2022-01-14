@@ -41,16 +41,19 @@ Use "branch help [command]" for more information about a command.
 
 ### Authentication
 
-To use the tool you first have to authenticate with Jira. You need the following to successfully setup the tool:
+To use the tool you first have to authenticate with the ticket system. 
+### Jira 
+
+When using Jira as ticket system you will need to gather the following information:
 
 - Email
 - Domain of your Jira
 - API Token (Learn more [here](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/))
 
-Once you have gathered these inputs, you can run the following command:
+Once you have gathered these inputs, you can run the following command and you will be prompted to enter the information.
 
 ```bash
-branch login -e=youremail@test.com -d=test -t=yourtoken
+branch login 
 ```
 
 ### Create branch
@@ -58,7 +61,7 @@ branch login -e=youremail@test.com -d=test -t=yourtoken
 To create a branch based on a Jira issue you can run the following command:
 
 ```bash
-branch n -i=key
+branch c -k=key
 ```
 
-The `i` argument corresponds to the issue key. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
+The `k` argument corresponds to the issue key. Please not that your working tree must be clean for the command to succeed, untracked files are ignored at the moment!
