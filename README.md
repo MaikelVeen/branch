@@ -1,3 +1,4 @@
+```
  ________      ________      ________      ________       ________      ___  ___     
 |\   __  \    |\   __  \    |\   __  \    |\   ___  \    |\   ____\    |\  \|\  \    
 \ \  \|\ /_   \ \  \|\  \   \ \  \|\  \   \ \  \\ \  \   \ \  \___|    \ \  \\\  \   
@@ -6,7 +7,7 @@
    \ \_______\   \ \__\\ _\    \ \__\ \__\   \ \__\\ \__\   \ \_______\   \ \__\ \__\
     \|_______|    \|__|\|__|    \|__|\|__|    \|__| \|__|    \|_______|    \|__|\|__|
                                                                                      
----
+```
 # branch
 
 branch is a small CLI tool to automatically create git branches based on tickets from issue/tickets systems like Jira.
@@ -22,6 +23,21 @@ go install
 The `go install` command places the executable into the $GOPATH/bin directory. The command will place generated executables into a sub-directory of $GOPATH named bin. So please make sure that this directory is in your `$PATH` environment variable.
 
 ## Usage
+
+```
+branch is a small CLI tool to automatically create git branches based on tickets.
+
+Usage:
+
+        branch command [arguments]
+
+The commands are:
+
+        login       authenticates with ticket system
+        c           creates a new branch based on a ticket
+
+Use "branch help [command]" for more information about a command.
+```
 
 ### Authentication
 

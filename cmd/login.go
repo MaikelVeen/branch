@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/MaikelVeen/branch/printer"
 	"github.com/MaikelVeen/branch/prompt"
@@ -14,7 +15,7 @@ import (
 func GetLoginCommand() climax.Command {
 	return climax.Command{
 		Name:   "login",
-		Brief:  "authenticates with Jira",
+		Brief:  "authenticates with ticket system",
 		Handle: ExecuteLoginCommand,
 	}
 }
@@ -82,8 +83,10 @@ func getSystemType() (ticket.SupportedTicketSystem, error) {
 		InfoLines: []string{"Which system are you logging into ?", "Options are: jira"},
 		Label:     "System",
 		Validator: func(s string) error {
-			if StringInSliceCaseInsensitive(s, ticket.SupportedTicketSystems) {
-				return nil
+			for _, sliceItem := range ticket.SupportedTicketSystems {
+				if strings.EqualFold(s, sliceItem) {
+					return nil
+				}
 			}
 
 			return errors.New("")
