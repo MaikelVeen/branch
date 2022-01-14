@@ -29,17 +29,28 @@ func GetCreateCommand() climax.Command {
 				Help:     `The key/id of the ticket`,
 				Variable: true,
 			},
+			{
+				Name:     "base",
+				Short:    "b",
+				Usage:    `--base="."`,
+				Help:     `Overrides the default base branch`,
+				Variable: true,
+			},
 		},
 		Handle: ExecuteCreateCommand,
 	}
 }
 
 func ExecuteCreateCommand(ctx climax.Context) int {
+	// TODO: make a better distinction between the default base `develop` and the
+	// "base" of the new branch.
 	key, ok := ctx.Get("key")
 	if !ok {
 		printer.Warning("--key --k flag is not optional, example -k=abc-123")
 		return 1
 	}
+
+	customBranch, customBranchSet := ctx.Get("base")
 
 	// Get an authenticated ticket system.
 	system, err := getSystem()
@@ -61,19 +72,29 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 	err = checkBaseBranch(g, baseBranch)
 	if err != nil {
 		printer.Error(nil, err)
+		return 1
 	}
 
 	ticket, err := system.GetTicket(key)
 	if err != nil {
 		printer.Error(nil, err)
+		return 1
 	}
 
-	base := system.GetBaseFromTicketType(ticket.Type)
+	// If a custom base is set use that otherwise get from ticket.
+	var base string
+	if customBranchSet {
+		base = customBranch
+	} else {
+		base = system.GetBaseFromTicketType(ticket.Type)
+	}
+
 	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
 
 	err = checkoutOrCreateBranch(branch, g)
 	if err != nil {
 		printer.Error(nil, err)
+		return 1
 	}
 
 	printer.Success(fmt.Sprintf("checked out %s", branch))
@@ -159,6 +180,7 @@ func checkoutOrCreateBranch(b string, g git.GitCommander) error {
 		return nil
 	}
 
+	// TODO: return pretty errors, or just the errors that the command returns
 	err = g.ExecuteShowRef(exec.Command, b)
 	if err != nil {
 		// ShowRef returns error when branch does not exist.
