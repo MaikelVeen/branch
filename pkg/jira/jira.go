@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MaikelVeen/branch/prompt"
-	"github.com/MaikelVeen/branch/ticket"
+	"github.com/MaikelVeen/branch/pkg/prompt"
+	"github.com/MaikelVeen/branch/pkg/ticket"
 	"github.com/fatih/color"
 )
 

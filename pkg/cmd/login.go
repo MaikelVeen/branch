@@ -1,5 +1,6 @@
 package cmd
 
+/*
 import (
 	"errors"
 	"fmt"
@@ -102,3 +103,4 @@ func getSystemType() (ticket.SupportedTicketSystem, error) {
 
 	return ticket.SupportedTicketSystem(system), err
 }
+*/

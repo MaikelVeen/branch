@@ -6,57 +6,42 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/MaikelVeen/branch/git"
-	"github.com/MaikelVeen/branch/printer"
-	"github.com/MaikelVeen/branch/prompt"
-	"github.com/MaikelVeen/branch/ticket"
-	"github.com/tucnak/climax"
+	"github.com/MaikelVeen/branch/pkg/git"
+	"github.com/MaikelVeen/branch/pkg/jira"
+	"github.com/MaikelVeen/branch/pkg/printer"
+	"github.com/MaikelVeen/branch/pkg/prompt"
+	"github.com/MaikelVeen/branch/pkg/ticket"
+	"github.com/MaikelVeen/branch/pkg/validators"
+	"github.com/spf13/cobra"
 )
 
-// TODO: make this configurable
 const baseBranch = "develop"
 
-func GetCreateCommand() climax.Command {
-	return climax.Command{
-		Name:  "c",
-		Brief: "creates a new branch based on a ticket",
-
-		Flags: []climax.Flag{
-			{
-				Name:     "key",
-				Short:    "k",
-				Usage:    `--key="."`,
-				Help:     `The key/id of the ticket`,
-				Variable: true,
-			},
-			{
-				Name:     "base",
-				Short:    "b",
-				Usage:    `--base="."`,
-				Help:     `Overrides the default base branch`,
-				Variable: true,
-			},
-		},
-		Handle: ExecuteCreateCommand,
-	}
+type createCmd struct {
+	cmd *cobra.Command
 }
 
-func ExecuteCreateCommand(ctx climax.Context) int {
-	// TODO: make a better distinction between the default base `develop` and the
-	// "base" of the new branch.
-	key, ok := ctx.Get("key")
-	if !ok {
-		printer.Warning("--key --k flag is not optional, example -k=abc-123")
-		return 1
+func newCreateCommand() *createCmd {
+	cc := &createCmd{}
+
+	cc.cmd = &cobra.Command{
+		Use:   "create",
+		Args:  validators.ExactArgs(1),
+		Short: "creates a new git branch based on a ticket identifier",
+		RunE:  cc.runCreateCommand,
 	}
 
-	customBranch, customBranchSet := ctx.Get("base")
+	return cc
+}
+
+func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
+	key := args[0]
 
 	// Get an authenticated ticket system.
 	system, err := getSystem()
 	if err != nil {
 		printer.Error(nil, err)
-		return 1
+		return err
 	}
 
 	g := git.NewGitGitCommander()
@@ -72,34 +57,27 @@ func ExecuteCreateCommand(ctx climax.Context) int {
 	err = checkBaseBranch(g, baseBranch)
 	if err != nil {
 		printer.Error(nil, err)
-		return 1
+		return errors.New("could not check current branch")
 	}
 
 	ticket, err := system.GetTicket(key)
 	if err != nil {
 		printer.Error(nil, err)
-		return 1
+		return errors.New("could not get ticket")
 	}
 
-	// If a custom base is set use that otherwise get from ticket.
-	var base string
-	if customBranchSet {
-		base = customBranch
-	} else {
-		base = system.GetBaseFromTicketType(ticket.Type)
-	}
-
+	base := system.GetBaseFromTicketType(ticket.Type)
 	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
 
 	err = checkoutOrCreateBranch(branch, g)
 	if err != nil {
 		printer.Error(nil, err)
-		return 1
+		return errors.New("could not checkout")
 	}
 
 	printer.Success(fmt.Sprintf("checked out %s", branch))
 
-	return 0
+	return nil
 }
 
 // getSystem returns a ticket system based on the local saved user.
@@ -110,7 +88,7 @@ func getSystem() (ticket.TicketSystem, error) {
 		return nil, err
 	}
 
-	system, err := GetAuthenticatedTicketSystem(u.System)
+	system, err := getAuthenticatedTicketSystem(u.System)
 	if err != nil {
 		return nil, err
 	}
@@ -196,4 +174,25 @@ func checkoutOrCreateBranch(b string, g git.GitCommander) error {
 	}
 
 	return nil
+}
+
+const keyRingService = "branch-cli"
+const keyRingUser = "branch-cli-anon"
+
+func getNewTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
+	switch s {
+	case ticket.Jira:
+		return jira.NewJira(keyRingService, keyRingUser)
+	}
+
+	return nil
+}
+
+func getAuthenticatedTicketSystem(s ticket.SupportedTicketSystem) (ticket.TicketSystem, error) {
+	switch s {
+	case ticket.Jira:
+		return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
+	}
+
+	return nil, nil
 }
