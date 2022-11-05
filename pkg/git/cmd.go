@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+const (
+	StatusCmd   string = "status"
+	BranchCmd   string = "branch"
+	CheckoutCmd string = "checkout"
+	RemoteCmd   string = "remote"
+)
+
 // ExecContext is a function that returns an external command being prepared or run
 // in either a real or simulated shell.
 type ExecContext = func(command string, args ...string) *exec.Cmd
@@ -19,12 +26,8 @@ func NewCommander() *Commander {
 	return &Commander{}
 }
 
-// Status executes `git status` and returns
-// the output and an error if the command execution fails.
-//
-//  https://git-scm.com/docs/git-status
-func (g *Commander) Status(ctx ExecContext, args ...string) (string, error) {
-	cmd := []string{"status"}
+func executewithOutput(ctx ExecContext, name string, args ...string) (string, error) {
+	cmd := []string{name}
 	cmd = append(cmd, args...)
 
 	out, err := ctx("git", cmd...).Output()
@@ -33,6 +36,14 @@ func (g *Commander) Status(ctx ExecContext, args ...string) (string, error) {
 	}
 
 	return string(out), nil
+}
+
+// Status executes `git status` and returns
+// the output and an error if the command execution fails.
+//
+//  https://git-scm.com/docs/git-status
+func (g *Commander) Status(ctx ExecContext, args ...string) (string, error) {
+	return executewithOutput(ctx, StatusCmd, args...)
 }
 
 // Branch executes `git branch <b>` where b represents
@@ -84,4 +95,11 @@ func (g *Commander) ShortSymbolicRef(ctx ExecContext) (string, error) {
 	}
 
 	return strings.TrimSpace(string(out)), nil
+}
+
+// Remote executes `git remote <args>`
+//
+// https://git-scm.com/docs/git-remote
+func (g *Commander) Remote(ctx ExecContext, args ...string) (string, error) {
+	return executewithOutput(ctx, RemoteCmd, args...)
 }

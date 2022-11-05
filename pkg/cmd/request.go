@@ -29,23 +29,28 @@ func newPullRequestCommand() *pullRequestCmd {
 func (c *pullRequestCmd) runPullRequestCommand(cmd *cobra.Command, args []string) error {
 	commander := NewCommander()
 
-	if err := c.validOrigin(commander); err != nil {
+	if err := c.hasRemote(commander); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// validOrigin checks wether the current checked out branch
-// has an origin. If there is no origin then an error is returned.
-func (c *pullRequestCmd) validOrigin(git *Commander) error {
+// hasRemote returns an error if the current branch does not have a remote.
+func (c *pullRequestCmd) hasRemote(git *Commander) error {
+	remote, err := git.Remote(exec.Command)
+	if err != nil {
+		return fmt.Errorf("could not get git origin: %v", err)
+
+	}
+
 	status, err := git.Status(exec.Command, "-sb")
 	if err != nil {
 		return fmt.Errorf("could not get git status: %v", err)
 	}
 
 	lines := strings.Split(status, "\n")
-	if !strings.Contains(lines[0], "origin") {
+	if !strings.Contains(lines[0], strings.TrimSpace(remote)) {
 		return errors.New("current branch does not have an origin, aborting pr")
 	}
 
