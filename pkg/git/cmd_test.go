@@ -20,14 +20,14 @@ func TestExecuteStatus(t *testing.T) {
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", "git status")
-		err := cmd.ExecuteStatus(cmdCtx)
+		_, err := cmd.Status(cmdCtx)
 
 		assert.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", "git status")
-		err := cmd.ExecuteStatus(cmdCtx)
+		_, err := cmd.Status(cmdCtx)
 
 		assert.Error(t, err)
 	})
@@ -42,7 +42,7 @@ func TestExecuteBranch(t *testing.T) {
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
-		err := cmd.ExecuteBranch(cmdCtx, b)
+		err := cmd.Branch(cmdCtx, b)
 
 		assert.NoError(t, err)
 	})
@@ -51,7 +51,7 @@ func TestExecuteBranch(t *testing.T) {
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
-		err := cmd.ExecuteBranch(cmdCtx, b)
+		err := cmd.Branch(cmdCtx, b)
 
 		assert.Error(t, err)
 	})
@@ -66,7 +66,7 @@ func TestExecuteCheckout(t *testing.T) {
 		exp := fmt.Sprintf("git checkout %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
-		err := cmd.ExecuteCheckout(cmdCtx, b)
+		err := cmd.Checkout(cmdCtx, b)
 
 		assert.NoError(t, err)
 	})
@@ -75,7 +75,7 @@ func TestExecuteCheckout(t *testing.T) {
 		exp := fmt.Sprintf("git checkout %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
-		err := cmd.ExecuteCheckout(cmdCtx, b)
+		err := cmd.Checkout(cmdCtx, b)
 
 		assert.Error(t, err)
 	})
@@ -90,7 +90,7 @@ func TestExecuteDiffIndex(t *testing.T) {
 		exp := fmt.Sprintf("git diff-index --quiet %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
-		err := cmd.ExecuteDiffIndex(cmdCtx, b)
+		err := cmd.DiffIndex(cmdCtx, b)
 
 		assert.NoError(t, err)
 	})
@@ -99,7 +99,7 @@ func TestExecuteDiffIndex(t *testing.T) {
 		exp := fmt.Sprintf("git diff-index --quiet %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
-		err := cmd.ExecuteDiffIndex(cmdCtx, b)
+		err := cmd.DiffIndex(cmdCtx, b)
 
 		assert.Error(t, err)
 	})
@@ -114,7 +114,7 @@ func TestExecuteShowRef(t *testing.T) {
 		exp := fmt.Sprintf("git show-ref --verify --quiet refs/heads/%s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
-		err := cmd.ExecuteShowRef(cmdCtx, b)
+		err := cmd.ShowRef(cmdCtx, b)
 
 		assert.NoError(t, err)
 	})
@@ -123,7 +123,7 @@ func TestExecuteShowRef(t *testing.T) {
 		exp := fmt.Sprintf("git show-ref --verify --quiet refs/heads/%s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
-		err := cmd.ExecuteShowRef(cmdCtx, b)
+		err := cmd.ShowRef(cmdCtx, b)
 
 		assert.Error(t, err)
 	})
@@ -135,7 +135,7 @@ func TestExecuteShortSymbolicRef(t *testing.T) {
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccessSymbolicRef", "git symbolic-ref --short HEAD")
-		branch, err := cmd.ExecuteShortSymbolicRef(cmdCtx)
+		branch, err := cmd.ShortSymbolicRef(cmdCtx)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "master", branch)
@@ -143,7 +143,7 @@ func TestExecuteShortSymbolicRef(t *testing.T) {
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", "git symbolic-ref --short HEAD")
-		branch, err := cmd.ExecuteShortSymbolicRef(cmdCtx)
+		branch, err := cmd.ShortSymbolicRef(cmdCtx)
 
 		assert.Error(t, err)
 		assert.Empty(t, branch)
