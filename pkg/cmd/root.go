@@ -24,6 +24,7 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(newCreateCommand().cmd)
+	rootCmd.AddCommand(newPullRequestCommand().cmd)
 
 	lc := newLoginCommand()
 	lc.RegisterSystem(ticket.Jira)

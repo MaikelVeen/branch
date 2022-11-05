@@ -10,7 +10,7 @@
 ```
 ---
 
-branch is a CLI tool with version control addons.
+branch is a macOS CLI tool with version control addons. 
 
 # Installation
 
@@ -42,9 +42,10 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
-  create      creates a new git branch based on a ticket identifier
+  create      Creates a new git branch based on a ticket identifier
   help        Help about any command
-  login       authenticates with a ticket system.
+  login       Authenticates with a ticket system.
+  pr          Creates a new GitHub Pull Request
 
 Flags:
   -h, --help   help for branch
