@@ -16,7 +16,7 @@ import (
 
 func TestExecuteStatus(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", "git status")
@@ -35,7 +35,7 @@ func TestExecuteStatus(t *testing.T) {
 
 func TestExecuteBranch(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
@@ -59,7 +59,7 @@ func TestExecuteBranch(t *testing.T) {
 
 func TestExecuteCheckout(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
@@ -83,7 +83,7 @@ func TestExecuteCheckout(t *testing.T) {
 
 func TestExecuteDiffIndex(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 	b := "HEAD"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestExecuteDiffIndex(t *testing.T) {
 
 func TestExecuteShowRef(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
@@ -131,7 +131,7 @@ func TestExecuteShowRef(t *testing.T) {
 
 func TestExecuteShortSymbolicRef(t *testing.T) {
 	t.Parallel()
-	cmd := NewGitGitCommander()
+	cmd := NewCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccessSymbolicRef", "git symbolic-ref --short HEAD")

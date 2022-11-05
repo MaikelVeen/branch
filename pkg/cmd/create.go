@@ -44,7 +44,7 @@ func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	g := git.NewGitGitCommander()
+	g := git.NewCommander()
 
 	// Check the preconditions.
 	err = checkPreconditions(key, g, system)
@@ -98,7 +98,7 @@ func getSystem() (ticket.TicketSystem, error) {
 
 // checkPreconditions returns an error when one of the following checks fails:
 // validity of the key, in git repo and working tree clean.
-func checkPreconditions(key string, g git.GitCommander, s ticket.TicketSystem) error {
+func checkPreconditions(key string, g *git.Commander, s ticket.TicketSystem) error {
 	if err := s.ValidateKey(key); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func checkPreconditions(key string, g git.GitCommander, s ticket.TicketSystem) e
 
 // checkBaseBranch checks if the configured base branch is currently
 // set and ask if the user wants to switch if that is not the case.
-func checkBaseBranch(g git.GitCommander, base string) error {
+func checkBaseBranch(g *git.Commander, base string) error {
 	b, err := g.ExecuteShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func checkBaseBranch(g git.GitCommander, base string) error {
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
 // Then checks if `b` exists, if not creates it and checks it out
-func checkoutOrCreateBranch(b string, g git.GitCommander) error {
+func checkoutOrCreateBranch(b string, g *git.Commander) error {
 	current, err := g.ExecuteShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
