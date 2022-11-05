@@ -25,10 +25,11 @@ func newCreateCommand() *createCmd {
 	cc := &createCmd{}
 
 	cc.cmd = &cobra.Command{
-		Use:   "create",
-		Args:  validators.ExactArgs(1),
-		Short: "creates a new git branch based on a ticket identifier",
-		RunE:  cc.runCreateCommand,
+		Use:     "create",
+		Aliases: []string{"c"},
+		Args:    validators.ExactArgs(1),
+		Short:   "creates a new git branch based on a ticket identifier",
+		RunE:    cc.runCreateCommand,
 	}
 
 	return cc
