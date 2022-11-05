@@ -28,7 +28,7 @@ func newCreateCommand() *createCmd {
 		Use:     "create",
 		Aliases: []string{"c"},
 		Args:    validators.ExactArgs(1),
-		Short:   "creates a new git branch based on a ticket identifier",
+		Short:   "Creates a new git branch based on a ticket identifier",
 		RunE:    cc.runCreateCommand,
 	}
 

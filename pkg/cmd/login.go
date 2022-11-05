@@ -22,7 +22,7 @@ func newLoginCommand() *loginCmd {
 	lc.cmd = &cobra.Command{
 		Use:   "login",
 		Args:  validators.ExactArgs(1),
-		Short: "authenticates with a ticket system.",
+		Short: "Authenticates with a ticket system.",
 		RunE:  lc.runLoginCommand,
 	}
 

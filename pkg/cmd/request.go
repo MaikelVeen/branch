@@ -19,7 +19,7 @@ func newPullRequestCommand() *pullRequestCmd {
 
 	pr.cmd = &cobra.Command{
 		Use:   "pr",
-		Short: "creates a new PR",
+		Short: "Creates a new GitHub Pull Request",
 		RunE:  pr.runPullRequestCommand,
 	}
 
