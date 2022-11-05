@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/MaikelVeen/branch/printer"
+	"github.com/MaikelVeen/branch/pkg/printer"
 	"github.com/fatih/color"
 	"golang.org/x/term"
 )

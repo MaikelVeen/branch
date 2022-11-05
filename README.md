@@ -10,7 +10,7 @@
 ```
 ---
 
-branch is a small CLI tool to automatically create git branches based on tickets from issue/tickets systems like Jira.
+branch is a CLI tool with version control addons.
 
 # Installation
 
@@ -35,18 +35,21 @@ brew install branch
 # Usage
 
 ```
-branch is a small CLI tool to automatically create git branches based on tickets.
+branch is a CLI tool with version control enhancements
 
 Usage:
+  branch [command]
 
-        branch command [arguments]
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  create      creates a new git branch based on a ticket identifier
+  help        Help about any command
+  login       authenticates with a ticket system.
 
-The commands are:
+Flags:
+  -h, --help   help for branch
 
-        login       authenticates with ticket system
-        c           creates a new branch based on a ticket
-
-Use "branch help [command]" for more information about a command.
+Use "branch [command] --help" for more information about a command.
 ```
 
 ## Authentication
