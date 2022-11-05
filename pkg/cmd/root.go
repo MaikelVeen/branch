@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MaikelVeen/branch/pkg/ticket"
 	"github.com/spf13/cobra"
 )
 
@@ -23,4 +24,8 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(newCreateCommand().cmd)
+
+	lc := newLoginCommand()
+	lc.RegisterSystem(ticket.Jira)
+	rootCmd.AddCommand(lc.cmd)
 }

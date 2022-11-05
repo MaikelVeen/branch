@@ -10,30 +10,30 @@ import (
 	"github.com/fatih/color"
 )
 
-type jiraImplemtation struct {
-	KeyService string
-	KeyUser    string
-	Suffix     string
+type jira struct {
+	keyService string
+	keyUser    string
+	suffix     string
 	client     JiraClient
 }
 
 func NewJira(service, user string) ticket.TicketSystem {
-	return &jiraImplemtation{
-		KeyService: service,
-		KeyUser:    user,
-		Suffix:     "jira",
+	return &jira{
+		keyService: service,
+		keyUser:    user,
+		suffix:     "jira",
 	}
 }
 
 func NewAuthenticatedJira(service, user string) (ticket.TicketSystem, error) {
-	j := &jiraImplemtation{
-		KeyService: service,
-		KeyUser:    user,
-		Suffix:     "jira",
+	j := &jira{
+		keyService: service,
+		keyUser:    user,
+		suffix:     "jira",
 	}
 
-	s := fmt.Sprintf("%s.%s", j.KeyService, j.Suffix)
-	c, err := NewJiraClient(s, j.KeyUser)
+	s := fmt.Sprintf("%s.%s", j.keyService, j.suffix)
+	c, err := NewJiraClient(s, j.keyUser)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ type JiraCredentials struct {
 	Domain string
 }
 
-func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
+func (j *jira) Authenticate(data interface{}) (ticket.User, error) {
 	tu := ticket.User{
 		System: ticket.Jira,
 	}
@@ -84,7 +84,7 @@ func (j *jiraImplemtation) Authenticate(data interface{}) (ticket.User, error) {
 	return tu, nil
 }
 
-func (j *jiraImplemtation) GetTicket(key string) (ticket.Ticket, error) {
+func (j *jira) Ticket(key string) (ticket.Ticket, error) {
 	issue, err := j.client.GetIssue(key)
 	if err != nil {
 		if errors.Is(err, ErrUnauthorized) {
@@ -103,7 +103,7 @@ func (j *jiraImplemtation) GetTicket(key string) (ticket.Ticket, error) {
 	}, nil
 }
 
-func (j *jiraImplemtation) GetBaseFromTicketType(typ string) string {
+func (j *jira) GetBaseFromTicketType(typ string) string {
 	// TODO: define defaults in git package
 	for _, sliceItem := range []string{"bug"} {
 		if strings.EqualFold(typ, sliceItem) {
@@ -114,18 +114,18 @@ func (j *jiraImplemtation) GetBaseFromTicketType(typ string) string {
 	return "feature"
 }
 
-func (j *jiraImplemtation) SaveCredentials() error {
-	service := fmt.Sprintf("%s.%s", j.KeyService, j.Suffix)
-	return j.client.SaveToKeyring(service, j.KeyUser)
+func (j *jira) SaveCredentials() error {
+	service := fmt.Sprintf("%s.%s", j.keyService, j.suffix)
+	return j.client.SaveToKeyring(service, j.keyUser)
 }
 
-func (j *jiraImplemtation) ValidateKey(key string) error {
+func (j *jira) ValidateKey(key string) error {
 	// TODO: Implement key checking
 	// https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/
 	return nil
 }
 
-func (j *jiraImplemtation) GetLoginScenario() ticket.LoginScenario {
+func (j *jira) LoginScenario() ticket.LoginScenario {
 	return func() (interface{}, error) {
 		// Get the email address from the user.
 		emailPrompt := prompt.Prompt{

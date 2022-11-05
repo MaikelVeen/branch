@@ -60,7 +60,7 @@ func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
 		return errors.New("could not check current branch")
 	}
 
-	ticket, err := system.GetTicket(key)
+	ticket, err := system.Ticket(key)
 	if err != nil {
 		printer.Error(nil, err)
 		return errors.New("could not get ticket")
@@ -179,7 +179,7 @@ func checkoutOrCreateBranch(b string, g *git.Commander) error {
 const keyRingService = "branch-cli"
 const keyRingUser = "branch-cli-anon"
 
-func getNewTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
+func getNewTicketSystem(s ticket.System) ticket.TicketSystem {
 	switch s {
 	case ticket.Jira:
 		return jira.NewJira(keyRingService, keyRingUser)
@@ -188,7 +188,7 @@ func getNewTicketSystem(s ticket.SupportedTicketSystem) ticket.TicketSystem {
 	return nil
 }
 
-func getAuthenticatedTicketSystem(s ticket.SupportedTicketSystem) (ticket.TicketSystem, error) {
+func getAuthenticatedTicketSystem(s ticket.System) (ticket.TicketSystem, error) {
 	switch s {
 	case ticket.Jira:
 		return jira.NewAuthenticatedJira(keyRingService, keyRingUser)

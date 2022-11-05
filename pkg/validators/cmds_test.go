@@ -34,3 +34,19 @@ func TestExactArgs(t *testing.T) {
 		require.EqualError(t, result, "`c` requires exactly 2 positional arguments. See `c --help` for supported flags and usage")
 	})
 }
+
+func TestNoArgs(t *testing.T) {
+	c := &cobra.Command{Use: "c"}
+	args := []string{}
+
+	result := NoArgs(c, args)
+	require.Nil(t, result)
+}
+
+func TestNoArgsWithArgs(t *testing.T) {
+	c := &cobra.Command{Use: "c"}
+	args := []string{"foo"}
+
+	result := NoArgs(c, args)
+	require.EqualError(t, result, "`c` does not take any positional arguments. See `c --help` for supported flags and usage")
+}

@@ -42,3 +42,19 @@ func ExactArgs(num int) cobra.PositionalArgs {
 		return nil
 	}
 }
+
+// NoArgs is a validator for commands to print an error when an argument is provided
+func NoArgs(cmd *cobra.Command, args []string) error {
+	commandPath := getCommandPath(cmd)
+	errorMessage := fmt.Sprintf(
+		"`%s` does not take any positional arguments. See `%s --help` for supported flags and usage",
+		commandPath,
+		commandPath,
+	)
+
+	if len(args) > 0 {
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}

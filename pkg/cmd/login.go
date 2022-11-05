@@ -1,43 +1,47 @@
 package cmd
 
-/*
 import (
 	"errors"
 	"fmt"
-	"strings"
 
-	"github.com/MaikelVeen/branch/printer"
-	"github.com/MaikelVeen/branch/prompt"
-	"github.com/MaikelVeen/branch/ticket"
-	"github.com/pterm/pterm"
-	"github.com/tucnak/climax"
+	"github.com/MaikelVeen/branch/pkg/printer"
+	"github.com/MaikelVeen/branch/pkg/ticket"
+	"github.com/MaikelVeen/branch/pkg/validators"
+	"github.com/spf13/cobra"
 )
 
-func GetLoginCommand() climax.Command {
-	return climax.Command{
-		Name:   "login",
-		Brief:  "authenticates with ticket system",
-		Handle: ExecuteLoginCommand,
-	}
+type loginCmd struct {
+	cmd *cobra.Command
+
+	systems []ticket.System
 }
 
-// ExecuteLoginCommand executes the login command.
-func ExecuteLoginCommand(ctx climax.Context) int {
-	// Print a large text with differently colored letters.
-	_ = pterm.DefaultBigText.WithLetters(
-		pterm.NewLettersFromStringWithStyle("branch", pterm.NewStyle(pterm.FgGreen)),
-	).Render()
+func newLoginCommand() *loginCmd {
+	lc := &loginCmd{}
 
-	printer.Greet("Welcome to the branch command line interface!")
-
-	systemType, err := getSystemType()
-	if err != nil {
-		printer.Error(nil, err)
-		return 1
+	lc.cmd = &cobra.Command{
+		Use:   "login",
+		Args:  validators.ExactArgs(1),
+		Short: "authenticates with a ticket system.",
+		RunE:  lc.runLoginCommand,
 	}
 
-	system := GetNewTicketSystem(systemType)
-	loginScenario := system.GetLoginScenario()
+	return lc
+}
+
+func (c *loginCmd) RegisterSystem(sys ticket.System) {
+	c.systems = append(c.systems, sys)
+}
+
+func (c *loginCmd) runLoginCommand(cmd *cobra.Command, args []string) error {
+	sys := args[0]
+
+	if err := c.isValidSystem(sys); err != nil {
+		return err
+	}
+
+	system := getNewTicketSystem(ticket.System(sys))
+	loginScenario := system.LoginScenario()
 
 	i := 3
 
@@ -46,7 +50,7 @@ func ExecuteLoginCommand(ctx climax.Context) int {
 		loginData, err := loginScenario()
 		if err != nil {
 			printer.Error(nil, err)
-			return 1
+			return err
 		}
 
 		// Authenticate with the login data.
@@ -56,51 +60,32 @@ func ExecuteLoginCommand(ctx climax.Context) int {
 				printer.Warning("Those credentials are invalid, please try again.")
 			} else {
 				printer.Error(nil, err)
-				return 1
+				return err
 			}
 
 			i--
 			continue
 		}
 
-		err = user.SaveToDisk()
-		if err != nil {
+		if err = user.SaveToDisk(); err != nil {
 			printer.Error(nil, err)
-			return 1
+			return err
 		}
 
 		printer.Success(fmt.Sprintf("Authenticated successfully as %s (%s)", user.DisplayName, user.Email))
-		return 0
+		return nil
 	}
 
 	printer.Warning("Aborting...")
-	return 1
+	return fmt.Errorf("Could not authenticate with %s", sys)
 }
 
-// getSystemType returns which SupportedTicketSystem the user is trying to login to.
-func getSystemType() (ticket.SupportedTicketSystem, error) {
-	// Ask the user for type of system.
-	systemPrompt := prompt.Prompt{
-		InfoLines: []string{"Which system are you logging into ?", "Options are: jira"},
-		Label:     "System",
-		Validator: func(s string) error {
-			for _, sliceItem := range ticket.SupportedTicketSystems {
-				if strings.EqualFold(s, sliceItem) {
-					return nil
-				}
-			}
-
-			return errors.New("")
-		},
-		Invalid: "That is not a valid option!",
+func (c *loginCmd) isValidSystem(sys string) error {
+	for _, rs := range c.systems {
+		if string(rs) == sys {
+			return nil
+		}
 	}
 
-	// Run the first prompt.
-	system, err := systemPrompt.Run()
-	if err != nil {
-		return "", err
-	}
-
-	return ticket.SupportedTicketSystem(system), err
+	return fmt.Errorf("%s is not a registered ticket system", sys)
 }
-*/
