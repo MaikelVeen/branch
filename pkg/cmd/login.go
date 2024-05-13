@@ -6,7 +6,6 @@ import (
 
 	"github.com/MaikelVeen/branch/pkg/printer"
 	"github.com/MaikelVeen/branch/pkg/ticket"
-	"github.com/MaikelVeen/branch/pkg/validators"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,7 @@ func newLoginCommand() *loginCmd {
 
 	lc.cmd = &cobra.Command{
 		Use:   "login",
-		Args:  validators.ExactArgs(1),
+		Args:  cobra.ExactArgs(1),
 		Short: "Authenticates with a ticket system.",
 		RunE:  lc.runLoginCommand,
 	}

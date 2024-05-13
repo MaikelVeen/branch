@@ -6,12 +6,11 @@ import (
 	"os/exec"
 	"strings"
 
-	. "github.com/MaikelVeen/branch/pkg/git"
+	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/MaikelVeen/branch/pkg/printer"
 	"github.com/MaikelVeen/branch/pkg/prompt"
 	"github.com/MaikelVeen/branch/pkg/ticket"
-	"github.com/MaikelVeen/branch/pkg/validators"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,7 @@ func newCreateCommand() *createCmd {
 	cc.cmd = &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
-		Args:    validators.ExactArgs(1),
+		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
 		RunE:    cc.runCreateCommand,
 	}
@@ -45,17 +44,17 @@ func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	git := NewCommander()
+	commander := git.NewCommander()
 
 	// Check the preconditions.
-	err = checkPreconditions(key, git, system)
+	err = checkPreconditions(key, commander, system)
 	if err != nil {
 		printer.Warning(err.Error())
 	}
 
 	printer.Print("Key is valid and working from a clean tree")
 
-	err = checkBaseBranch(git, baseBranch)
+	err = checkBaseBranch(commander, baseBranch)
 	if err != nil {
 		printer.Error(nil, err)
 		return errors.New("could not check current branch")
@@ -68,9 +67,9 @@ func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	base := system.GetBaseFromTicketType(ticket.Type)
-	branch := GetBranchName(base, ticket.Key, ticket.Title)
+	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
 
-	err = checkoutOrCreateBranch(branch, git)
+	err = checkoutOrCreateBranch(branch, commander)
 	if err != nil {
 		printer.Error(nil, err)
 		return errors.New("could not checkout")
@@ -99,17 +98,17 @@ func getSystem() (ticket.TicketSystem, error) {
 
 // checkPreconditions returns an error when one of the following checks fails:
 // validity of the key, in git repo and working tree clean.
-func checkPreconditions(key string, git *Commander, s ticket.TicketSystem) error {
+func checkPreconditions(key string, git *git.Commander, s ticket.TicketSystem) error {
 	if err := s.ValidateKey(key); err != nil {
 		return err
 	}
 
 	if _, err := git.Status(exec.Command); err != nil {
-		return errors.New("Checking git status failed, are you in a git repo?")
+		return errors.New("checking git status failed, are you in a git repo?")
 	}
 
 	if err := git.DiffIndex(exec.Command, "HEAD"); err != nil {
-		return errors.New("Working tree is not clean, aborting...")
+		return errors.New("working tree is not clean, aborting")
 	}
 
 	return nil
@@ -117,7 +116,7 @@ func checkPreconditions(key string, git *Commander, s ticket.TicketSystem) error
 
 // checkBaseBranch checks if the configured base branch is currently
 // set and ask if the user wants to switch if that is not the case.
-func checkBaseBranch(git *Commander, base string) error {
+func checkBaseBranch(git *git.Commander, base string) error {
 	b, err := git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
@@ -139,7 +138,7 @@ func checkBaseBranch(git *Commander, base string) error {
 		if s {
 			err := git.Checkout(exec.Command, base)
 			if err != nil {
-				return fmt.Errorf("Could not checkout the %s branch", base)
+				return fmt.Errorf("could not checkout the %s branch", base)
 			}
 		}
 	}
@@ -149,7 +148,7 @@ func checkBaseBranch(git *Commander, base string) error {
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
 // Then checks if `b` exists, if not creates it and checks it out
-func checkoutOrCreateBranch(b string, git *Commander) error {
+func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	current, err := git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
