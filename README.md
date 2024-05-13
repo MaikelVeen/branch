@@ -1,3 +1,5 @@
+# Branch 
+
 ```
  ________      ________      ________      ________       ________      ___  ___     
 |\   __  \    |\   __  \    |\   __  \    |\   ___  \    |\   ____\    |\  \|\  \    
@@ -10,7 +12,7 @@
 ```
 ---
 
-branch is a macOS CLI tool with version control addons. 
+`branch` is a command line utility that provides useful shortcuts when working with `git`.
 
 # Installation
 
@@ -56,6 +58,7 @@ Use "branch [command] --help" for more information about a command.
 ## Authentication
 
 To use the tool you first have to authenticate with the ticket system. 
+
 ### Jira 
 
 When using Jira as ticket system you will need to gather the following information:

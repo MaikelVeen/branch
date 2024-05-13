@@ -1,6 +1,6 @@
 module github.com/MaikelVeen/branch
 
-go 1.17
+go 1.22.2
 
 require (
 	github.com/fatih/color v1.13.0

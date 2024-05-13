@@ -14,10 +14,10 @@ type jira struct {
 	keyService string
 	keyUser    string
 	suffix     string
-	client     JiraClient
+	client     Client
 }
 
-func NewJira(service, user string) ticket.TicketSystem {
+func NewJira(service, user string) ticket.System {
 	return &jira{
 		keyService: service,
 		keyUser:    user,
@@ -25,7 +25,7 @@ func NewJira(service, user string) ticket.TicketSystem {
 	}
 }
 
-func NewAuthenticatedJira(service, user string) (ticket.TicketSystem, error) {
+func NewAuthenticatedJira(service, user string) (ticket.System, error) {
 	j := &jira{
 		keyService: service,
 		keyUser:    user,
@@ -43,7 +43,7 @@ func NewAuthenticatedJira(service, user string) (ticket.TicketSystem, error) {
 	return j, nil
 }
 
-type JiraCredentials struct {
+type Credentials struct {
 	Email  string
 	Token  string
 	Domain string
@@ -55,13 +55,13 @@ func (j *jira) Authenticate(data interface{}) (ticket.User, error) {
 	}
 
 	// Type assert passed interface.
-	creds, ok := data.(JiraCredentials)
+	creds, ok := data.(Credentials)
 	if !ok {
 		return tu, ticket.ErrTypeAssertionAuth
 	}
 
 	// Set the client
-	j.client = InitializeApiFromInit(creds.Email, creds.Domain, creds.Token)
+	j.client = InitializeAPIFromInit(creds.Email, creds.Domain, creds.Token)
 
 	user, err := j.client.GetCurrentUser()
 	if err != nil {
@@ -119,7 +119,7 @@ func (j *jira) SaveCredentials() error {
 	return j.client.SaveToKeyring(service, j.keyUser)
 }
 
-func (j *jira) ValidateKey(key string) error {
+func (j *jira) ValidateKey(_ string) error {
 	// TODO: Implement key checking
 	// https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/
 	return nil
@@ -163,11 +163,10 @@ func (j *jira) LoginScenario() ticket.LoginScenario {
 			return "", err
 		}
 
-		return JiraCredentials{
+		return Credentials{
 			Email:  email,
 			Domain: domain,
 			Token:  token,
 		}, nil
 	}
-
 }

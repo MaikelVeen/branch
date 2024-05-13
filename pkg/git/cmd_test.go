@@ -1,4 +1,4 @@
-package git
+package git_test
 
 // This file uses a modified version of the `fakeExecCommandSuccess` outlined in:
 // https://jamiethompson.me/posts/Unit-Testing-Exec-Command-In-Golang/
@@ -11,153 +11,180 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExecuteStatus(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+	cmd := git.NewCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", "git status")
 		_, err := cmd.Status(cmdCtx)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", "git status")
 		_, err := cmd.Status(cmdCtx)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestExecuteBranch(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+	cmd := git.NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
 		err := cmd.Branch(cmdCtx, b)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
 		err := cmd.Branch(cmdCtx, b)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestExecuteCheckout(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+	cmd := git.NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git checkout %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
 		err := cmd.Checkout(cmdCtx, b)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git checkout %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
 		err := cmd.Checkout(cmdCtx, b)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestExecuteDiffIndex(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+
+	cmd := git.NewCommander()
 	b := "HEAD"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git diff-index --quiet %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
 		err := cmd.DiffIndex(cmdCtx, b)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git diff-index --quiet %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
 		err := cmd.DiffIndex(cmdCtx, b)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestExecuteShowRef(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+	cmd := git.NewCommander()
 	b := "feature"
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git show-ref --verify --quiet refs/heads/%s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
 		err := cmd.ShowRef(cmdCtx, b)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		exp := fmt.Sprintf("git show-ref --verify --quiet refs/heads/%s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
 		err := cmd.ShowRef(cmdCtx, b)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestExecuteShortSymbolicRef(t *testing.T) {
 	t.Parallel()
-	cmd := NewCommander()
+	cmd := git.NewCommander()
 
 	t.Run("shell cmd success returns no err", func(t *testing.T) {
+		t.Parallel()
+
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccessSymbolicRef", "git symbolic-ref --short HEAD")
 		branch, err := cmd.ShortSymbolicRef(cmdCtx)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "master", branch)
 	})
 
 	t.Run("shell cmd failure returns err", func(t *testing.T) {
+		t.Parallel()
+
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", "git symbolic-ref --short HEAD")
 		branch, err := cmd.ShortSymbolicRef(cmdCtx)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Empty(t, branch)
 	})
 }
 
-func TestShellProcessSuccess(t *testing.T) {
+func TestShellProcessSuccess(_ *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
 	os.Exit(0)
 }
 
-func TestShellProcessSuccessSymbolicRef(t *testing.T) {
+func TestShellProcessSuccessSymbolicRef(_ *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
@@ -166,7 +193,7 @@ func TestShellProcessSuccessSymbolicRef(t *testing.T) {
 	os.Exit(0)
 }
 
-func TestShellProcessFail(t *testing.T) {
+func TestShellProcessFail(_ *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
@@ -179,8 +206,8 @@ func TestShellProcessFail(t *testing.T) {
 // It will also pass through the command and its arguments as an argument to shell substitute
 // expectedCommand can be used to check if the passed command is what is expected from the func under test.
 //
-// Since the closure has access to the outer func, the execContext is able to do asserts on
-func getFakeCommand(t *testing.T, shellSub, expectedCommand string) ExecContext {
+// Since the closure has access to the outer func, the execContext is able to do asserts on.
+func getFakeCommand(t *testing.T, shellSub, expectedCommand string) git.ExecContext {
 	// Modified from https://github.com/jthomperoo/test-exec-command-golang/blob/master/funshell/funshell_test.go#L57
 	test := fmt.Sprintf("-test.run=%s", shellSub)
 

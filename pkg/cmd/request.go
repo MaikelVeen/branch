@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	. "github.com/MaikelVeen/branch/pkg/git"
+	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/spf13/cobra"
 )
 
@@ -26,14 +26,14 @@ func newPullRequestCommand() *pullRequestCmd {
 	return pr
 }
 
-func (c *pullRequestCmd) runPullRequestCommand(cmd *cobra.Command, args []string) error {
-	commander := NewCommander()
+func (c *pullRequestCmd) runPullRequestCommand(_ *cobra.Command, _ []string) error {
+	commander := git.NewCommander()
 
 	if err := c.hasRemote(commander); err != nil {
 		return err
 	}
 
-	url, err := c.getUrl(commander)
+	url, err := c.getURL(commander)
 	if err != nil {
 		return err
 	}
@@ -43,16 +43,15 @@ func (c *pullRequestCmd) runPullRequestCommand(cmd *cobra.Command, args []string
 }
 
 // hasRemote returns an error if the current branch does not have a remote.
-func (c *pullRequestCmd) hasRemote(git *Commander) error {
+func (c *pullRequestCmd) hasRemote(git *git.Commander) error {
 	remote, err := git.Remote(exec.Command)
 	if err != nil {
-		return fmt.Errorf("could not get git origin: %v", err)
-
+		return fmt.Errorf("could not get git origin: %w", err)
 	}
 
 	status, err := git.Status(exec.Command, "-sb")
 	if err != nil {
-		return fmt.Errorf("could not get git status: %v", err)
+		return fmt.Errorf("could not get git status: %w", err)
 	}
 
 	lines := strings.Split(status, "\n")
@@ -63,10 +62,10 @@ func (c *pullRequestCmd) hasRemote(git *Commander) error {
 	return nil
 }
 
-func (c *pullRequestCmd) getUrl(git *Commander) (string, error) {
+func (c *pullRequestCmd) getURL(git *git.Commander) (string, error) {
 	remote, err := git.Remote(exec.Command)
 	if err != nil {
-		return "", fmt.Errorf("could not get git origin: %v", err)
+		return "", fmt.Errorf("could not get git origin: %w", err)
 	}
 
 	rawURL, err := git.Remote(exec.Command, "get-url", strings.TrimSpace(remote))

@@ -7,6 +7,10 @@ import (
 	"github.com/fatih/color"
 )
 
+const (
+	Retries = 3
+)
+
 // GetConfirmationPrompt returns a Prompt that has been configured
 // to show a [y/n] prompt to the user with `s` as label and `i` as info lines.
 func GetConfirmationPrompt(s string, i []string) *Prompt {
@@ -16,13 +20,12 @@ func GetConfirmationPrompt(s string, i []string) *Prompt {
 		LabelColour: color.FgYellow,
 		Invalid:     "Please enter [y/n]",
 		Validator: func(s string) error {
-			re, _ := regexp.Compile(`[yYnN]`)
-			if !re.MatchString(s) {
+			if re := regexp.MustCompile(`[yYnN]`); !re.MatchString(s) {
 				return errors.New("")
 			}
 
 			return nil
 		},
-		Retries: 3,
+		Retries: Retries,
 	}
 }

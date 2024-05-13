@@ -6,14 +6,13 @@ import (
 
 	"github.com/MaikelVeen/branch/pkg/printer"
 	"github.com/MaikelVeen/branch/pkg/ticket"
-	"github.com/MaikelVeen/branch/pkg/validators"
 	"github.com/spf13/cobra"
 )
 
 type loginCmd struct {
 	cmd *cobra.Command
 
-	systems []ticket.System
+	systems []ticket.SystemType
 }
 
 func newLoginCommand() *loginCmd {
@@ -21,7 +20,7 @@ func newLoginCommand() *loginCmd {
 
 	lc.cmd = &cobra.Command{
 		Use:   "login",
-		Args:  validators.ExactArgs(1),
+		Args:  cobra.ExactArgs(1),
 		Short: "Authenticates with a ticket system.",
 		RunE:  lc.runLoginCommand,
 	}
@@ -29,18 +28,18 @@ func newLoginCommand() *loginCmd {
 	return lc
 }
 
-func (c *loginCmd) RegisterSystem(sys ticket.System) {
+func (c *loginCmd) RegisterSystem(sys ticket.SystemType) {
 	c.systems = append(c.systems, sys)
 }
 
-func (c *loginCmd) runLoginCommand(cmd *cobra.Command, args []string) error {
+func (c *loginCmd) runLoginCommand(_ *cobra.Command, args []string) error {
 	sys := args[0]
 
 	if err := c.isValidSystem(sys); err != nil {
 		return err
 	}
 
-	system := getNewTicketSystem(ticket.System(sys))
+	system := getNewTicketSystem(ticket.SystemType(sys))
 	loginScenario := system.LoginScenario()
 
 	i := 3
@@ -77,7 +76,7 @@ func (c *loginCmd) runLoginCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	printer.Warning("Aborting...")
-	return fmt.Errorf("Could not authenticate with %s", sys)
+	return fmt.Errorf("could not authenticate with %s", sys)
 }
 
 func (c *loginCmd) isValidSystem(sys string) error {

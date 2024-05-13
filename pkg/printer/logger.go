@@ -41,7 +41,3 @@ func Greet(msg string) {
 func NewLine() {
 	fmt.Println()
 }
-
-func Fatal(err string) {
-
-}

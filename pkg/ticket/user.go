@@ -7,9 +7,9 @@ import (
 )
 
 type User struct {
-	DisplayName string
-	Email       string
-	System      System
+	DisplayName string     `json:"display_name"`
+	Email       string     `json:"email"`
+	System      SystemType `json:"system"`
 }
 
 // SaveToDisk dumps the current user to the file system
