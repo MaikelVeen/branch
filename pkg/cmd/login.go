@@ -12,7 +12,7 @@ import (
 type loginCmd struct {
 	cmd *cobra.Command
 
-	systems []ticket.System
+	systems []ticket.SystemType
 }
 
 func newLoginCommand() *loginCmd {
@@ -28,18 +28,18 @@ func newLoginCommand() *loginCmd {
 	return lc
 }
 
-func (c *loginCmd) RegisterSystem(sys ticket.System) {
+func (c *loginCmd) RegisterSystem(sys ticket.SystemType) {
 	c.systems = append(c.systems, sys)
 }
 
-func (c *loginCmd) runLoginCommand(cmd *cobra.Command, args []string) error {
+func (c *loginCmd) runLoginCommand(_ *cobra.Command, args []string) error {
 	sys := args[0]
 
 	if err := c.isValidSystem(sys); err != nil {
 		return err
 	}
 
-	system := getNewTicketSystem(ticket.System(sys))
+	system := getNewTicketSystem(ticket.SystemType(sys))
 	loginScenario := system.LoginScenario()
 
 	i := 3

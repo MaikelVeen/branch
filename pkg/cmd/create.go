@@ -34,7 +34,7 @@ func newCreateCommand() *createCmd {
 	return cc
 }
 
-func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
+func (c *createCmd) runCreateCommand(_ *cobra.Command, args []string) error {
 	key := args[0]
 
 	// Get an authenticated ticket system.
@@ -81,7 +81,7 @@ func (c *createCmd) runCreateCommand(cmd *cobra.Command, args []string) error {
 }
 
 // getSystem returns a ticket system based on the local saved user.
-func getSystem() (ticket.TicketSystem, error) {
+func getSystem() (ticket.System, error) {
 	// Load the current user from the disk.
 	u, err := ticket.LoadFromDisk()
 	if err != nil {
@@ -98,7 +98,7 @@ func getSystem() (ticket.TicketSystem, error) {
 
 // checkPreconditions returns an error when one of the following checks fails:
 // validity of the key, in git repo and working tree clean.
-func checkPreconditions(key string, git *git.Commander, s ticket.TicketSystem) error {
+func checkPreconditions(key string, git *git.Commander, s ticket.System) error {
 	if err := s.ValidateKey(key); err != nil {
 		return err
 	}
@@ -128,7 +128,8 @@ func checkBaseBranch(git *git.Commander, base string) error {
 		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
 
 		// Run the prompt.
-		val, err := switchPrompt.Run()
+		var val string
+		val, err = switchPrompt.Run()
 		if err != nil {
 			return err
 		}
@@ -136,8 +137,7 @@ func checkBaseBranch(git *git.Commander, base string) error {
 		// If return value is yes, checkout base branch.
 		s := strings.ToLower(strings.TrimSpace(val))[0] == 'y'
 		if s {
-			err := git.Checkout(exec.Command, base)
-			if err != nil {
+			if err = git.Checkout(exec.Command, base); err != nil {
 				return fmt.Errorf("could not checkout the %s branch", base)
 			}
 		}
@@ -147,7 +147,7 @@ func checkBaseBranch(git *git.Commander, base string) error {
 }
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
-// Then checks if `b` exists, if not creates it and checks it out
+// Then checks if `b` exists, if not creates it and checks it out.
 func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	current, err := git.ShortSymbolicRef(exec.Command)
 	if err != nil {
@@ -179,20 +179,10 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 const keyRingService = "branch-cli"
 const keyRingUser = "branch-cli-anon"
 
-func getNewTicketSystem(s ticket.System) ticket.TicketSystem {
-	switch s {
-	case ticket.Jira:
-		return jira.NewJira(keyRingService, keyRingUser)
-	}
-
-	return nil
+func getNewTicketSystem(_ ticket.SystemType) ticket.System {
+	return jira.NewJira(keyRingService, keyRingUser)
 }
 
-func getAuthenticatedTicketSystem(s ticket.System) (ticket.TicketSystem, error) {
-	switch s {
-	case ticket.Jira:
-		return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
-	}
-
-	return nil, nil
+func getAuthenticatedTicketSystem(_ ticket.SystemType) (ticket.System, error) {
+	return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
 }

@@ -8,6 +8,10 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
+const (
+	BaseURL = "https://%s.atlassian.net/"
+)
+
 var ErrUnauthorized = errors.New("received 401")
 var ErrNotFound = errors.New("received 404")
 
@@ -19,7 +23,7 @@ type jiraClient struct {
 	B Backend `json:"-"`
 }
 
-type JiraClient interface {
+type Client interface {
 	// SaveToKeyring saves the credentials of the current client to the
 	// system keyring.
 	SaveToKeyring(service, user string) error
@@ -28,10 +32,10 @@ type JiraClient interface {
 	IssueResource
 }
 
-// InitializeApiFromInit returns a new instance of JiraClient based on the
+// InitializeAPIFromInit returns a new instance of JiraClient based on the
 // passed init command values.
-func InitializeApiFromInit(email, domain, token string) JiraClient {
-	url := buildBaseUrl(domain)
+func InitializeAPIFromInit(email, domain, token string) Client {
+	url := fmt.Sprintf(BaseURL, domain)
 	b := NewBackend(url)
 
 	return &jiraClient{
@@ -42,13 +46,9 @@ func InitializeApiFromInit(email, domain, token string) JiraClient {
 	}
 }
 
-func buildBaseUrl(domain string) string {
-	return fmt.Sprintf("https://%s.atlassian.net/", domain)
-}
-
 // NewJiraClient returns a new instance of JiraApi with credentials
 // gathered from the local keyring.
-func NewJiraClient(service, user string) (JiraClient, error) {
+func NewJiraClient(service, user string) (Client, error) {
 	client := &jiraClient{}
 
 	creds, err := keyring.Get(service, user)

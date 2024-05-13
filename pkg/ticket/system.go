@@ -3,13 +3,13 @@
 // backend.
 package ticket
 
-// System represent an identifier for a ticket system.
-type System string
+// SystemType represent an identifier for a ticket system.
+type SystemType string
 
 // Jira is a proprietary issue tracking product developed by Atlassian.
-const Jira System = "jira"
+const Jira SystemType = "jira"
 
-type TicketSystem interface {
+type System interface {
 	Authenticate(data interface{}) (User, error)
 
 	// LoginScenario returns a function that will execute a number of prompts

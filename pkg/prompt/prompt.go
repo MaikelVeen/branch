@@ -71,9 +71,7 @@ func (p *Prompt) Run() (string, error) {
 		result := strings.TrimSuffix(input, "\n")
 
 		if p.Validator != nil {
-			err := p.Validator(result)
-
-			if err != nil {
+			if err = p.Validator(result); err != nil {
 				printer.Warning(p.Invalid)
 				continue
 			}

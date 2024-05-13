@@ -33,7 +33,13 @@ type BackendImplementation struct {
 }
 
 // Call is the implementation for invoking Jira APIs.
-func (s *BackendImplementation) Call(method, path, username, password string, body interface{}, v interface{}) (*http.Response, error) {
+func (s *BackendImplementation) Call(
+	method string,
+	path string,
+	username string,
+	password string,
+	body interface{},
+	v interface{}) (*http.Response, error) {
 	auth := s.BasicAuth(username, password)
 
 	req, err := s.NewRequest(method, path, auth, "application/json", body)
@@ -66,7 +72,6 @@ func (s *BackendImplementation) NewRequest(method, path, auth, contentType strin
 	// Body is set later by `Do`.
 	req, err := http.NewRequest(method, fullPath.String(), nil)
 	if err != nil {
-
 		return nil, err
 	}
 
@@ -87,7 +92,7 @@ func (s *BackendImplementation) Do(req *http.Request, v interface{}) (*http.Resp
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode >= http.StatusBadRequest {
 		return resp, errors.New("error during call")
 	}
 

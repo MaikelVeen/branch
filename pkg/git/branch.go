@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	MaxParts = 12
+)
+
 // FormatAsValidRef transforms `s` to a string that is a valid refname
 //
 // A reference is used in git to specify branches and tags. The following rules
@@ -30,7 +34,7 @@ func FormatAsValidRef(s string) string {
 
 	// Split the string on the spaces.
 	parts := strings.Split(s, " ")
-	cutoff := GetLengthWithUpperbound(parts, 12)
+	cutoff := GetLengthWithUpperbound(parts, MaxParts)
 
 	// Return hyphenated string
 	return strings.Join(parts[:cutoff], "-")

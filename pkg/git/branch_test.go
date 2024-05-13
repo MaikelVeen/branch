@@ -1,9 +1,10 @@
-package git
+package git_test
 
 import (
 	"strings"
 	"testing"
 
+	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,11 +50,9 @@ func TestFilter(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		tc := tc
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, tc.expect, FormatAsValidRef(tc.input))
+			assert.Equal(t, tc.expect, git.FormatAsValidRef(tc.input))
 		})
 	}
 
@@ -73,7 +72,7 @@ func TestFilter(t *testing.T) {
 
 			sb.WriteRune(end)
 
-			assert.Equal(t, "a-b", FormatAsValidRef(sb.String()))
+			assert.Equal(t, "a-b", git.FormatAsValidRef(sb.String()))
 			sb.Reset()
 		}
 	})
@@ -101,9 +100,8 @@ func TestGetBranchName(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.expect, GetBranchName(tc.base, tc.key, tc.title))
+			assert.Equal(t, tc.expect, git.GetBranchName(tc.base, tc.key, tc.title))
 		})
 	}
 }

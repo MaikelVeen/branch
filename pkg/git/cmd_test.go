@@ -206,7 +206,7 @@ func TestShellProcessFail(_ *testing.T) {
 // It will also pass through the command and its arguments as an argument to shell substitute
 // expectedCommand can be used to check if the passed command is what is expected from the func under test.
 //
-// Since the closure has access to the outer func, the execContext is able to do asserts on
+// Since the closure has access to the outer func, the execContext is able to do asserts on.
 func getFakeCommand(t *testing.T, shellSub, expectedCommand string) git.ExecContext {
 	// Modified from https://github.com/jthomperoo/test-exec-command-golang/blob/master/funshell/funshell_test.go#L57
 	test := fmt.Sprintf("-test.run=%s", shellSub)
