@@ -77,7 +77,7 @@ func (c *loginCmd) runLoginCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	printer.Warning("Aborting...")
-	return fmt.Errorf("Could not authenticate with %s", sys)
+	return fmt.Errorf("could not authenticate with %s", sys)
 }
 
 func (c *loginCmd) isValidSystem(sys string) error {

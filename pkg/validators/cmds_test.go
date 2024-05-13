@@ -11,6 +11,8 @@ func TestExactArgs(t *testing.T) {
 	t.Parallel()
 
 	t.Run("no error for exactly one argument", func(t *testing.T) {
+		t.Parallel()
+
 		c := &cobra.Command{Use: "c"}
 		args := []string{"foo"}
 
@@ -19,6 +21,8 @@ func TestExactArgs(t *testing.T) {
 	})
 
 	t.Run("error for one more than one argument", func(t *testing.T) {
+		t.Parallel()
+
 		c := &cobra.Command{Use: "c"}
 		args := []string{"foo", "bar"}
 
@@ -27,6 +31,8 @@ func TestExactArgs(t *testing.T) {
 	})
 
 	t.Run("error for more than two arguments if two are required", func(t *testing.T) {
+		t.Parallel()
+
 		c := &cobra.Command{Use: "c"}
 		args := []string{"foo", "bar", "baz"}
 

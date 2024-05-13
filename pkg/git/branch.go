@@ -13,11 +13,11 @@ import (
 // https://git-scm.com/docs/git-check-ref-format
 func FormatAsValidRef(s string) string {
 	// Remove everything inside () and [] to remove tags.
-	innerValRe, _ := regexp.Compile(`([\(\[]).*?([\)\]])`)
+	innerValRe := regexp.MustCompile(`([\(\[]).*?([\)\]])`)
 	s = innerValRe.ReplaceAllString(s, "")
 
 	// Remove all non alpha numeric chars expect whitespace.
-	special, _ := regexp.Compile(`[^a-zA-Z\d\s]`)
+	special := regexp.MustCompile(`[^a-zA-Z\d\s]`)
 	s = special.ReplaceAllString(s, " ")
 
 	// Remove leading and trailing whitespace.
@@ -25,7 +25,7 @@ func FormatAsValidRef(s string) string {
 	s = strings.ToLower(s)
 
 	// Remove spaces with single space.
-	d, _ := regexp.Compile(`\s\s+`)
+	d := regexp.MustCompile(`\s\s+`)
 	s = d.ReplaceAllString(s, " ")
 
 	// Split the string on the spaces.

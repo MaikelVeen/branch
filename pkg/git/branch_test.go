@@ -8,6 +8,8 @@ import (
 )
 
 func TestFilter(t *testing.T) {
+	t.Parallel()
+
 	testCases := map[string]struct {
 		input  string
 		expect string
@@ -48,6 +50,7 @@ func TestFilter(t *testing.T) {
 
 	for name, tc := range testCases {
 		tc := tc
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expect, FormatAsValidRef(tc.input))
