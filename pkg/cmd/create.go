@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/MaikelVeen/branch/pkg/git"
-	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/MaikelVeen/branch/pkg/printer"
 	"github.com/MaikelVeen/branch/pkg/prompt"
 	"github.com/MaikelVeen/branch/pkg/ticket"
@@ -180,9 +179,9 @@ const keyRingService = "branch-cli"
 const keyRingUser = "branch-cli-anon"
 
 func getNewTicketSystem(_ ticket.SystemType) ticket.System {
-	return jira.NewJira(keyRingService, keyRingUser)
+	panic("not implemented")
 }
 
 func getAuthenticatedTicketSystem(_ ticket.SystemType) (ticket.System, error) {
-	return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
+	panic("not implemented")
 }
