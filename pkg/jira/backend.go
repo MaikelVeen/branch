@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -59,7 +60,13 @@ func (s *BackendImplementation) BasicAuth(username, password string) string {
 
 // NewRequest is used by Call to generate an http.Request. It handles encoding
 // parameters and attaching the appropriate headers.
-func (s *BackendImplementation) NewRequest(method, path, auth, contentType string, body interface{}) (*http.Request, error) {
+func (s *BackendImplementation) NewRequest(
+	method,
+	path,
+	auth,
+	contentType string,
+	_ interface{},
+) (*http.Request, error) {
 	parsedPath, err := url.Parse(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating new request %w", err)
@@ -70,7 +77,7 @@ func (s *BackendImplementation) NewRequest(method, path, auth, contentType strin
 	fullPath := s.URL.ResolveReference(parsedPath)
 
 	// Body is set later by `Do`.
-	req, err := http.NewRequest(method, fullPath.String(), nil)
+	req, err := http.NewRequestWithContext(context.Background(), method, fullPath.String(), nil)
 	if err != nil {
 		return nil, err
 	}

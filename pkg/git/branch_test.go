@@ -66,7 +66,7 @@ func TestFilter(t *testing.T) {
 			var sb strings.Builder
 			sb.WriteRune(start)
 
-			for j := 0; j < i; j++ {
+			for range i {
 				sb.WriteRune(' ')
 			}
 

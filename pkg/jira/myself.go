@@ -5,8 +5,9 @@ import (
 	"net/http"
 )
 
-// This resource represents information about the current user, such as basic details, group membership, application roles, preferences, and locale. Use it to
-// get, create, update, and delete (restore default) values of the user's preferences and locale.
+// This resource represents information about the current user, such as basic details, group membership,
+// application roles, preferences, and locale. Use it to get, create, update, and delete (restore default)
+// values of the user's preferences and locale.
 type MyselfResource interface {
 	// GetCurrentUser returns details for the current user.
 	GetCurrentUser() (User, error)
@@ -21,6 +22,7 @@ func (c *jiraClient) GetCurrentUser() (User, error) {
 			return user, ErrUnauthorized
 		}
 	}
+	resp.Body.Close()
 
 	return user, nil
 }

@@ -64,6 +64,7 @@ func (p *Prompt) Run() (string, error) {
 		}
 
 		// Empty input (i.e. "\n")
+		//nolint:mnd // Because I said so.
 		if len(input) < 2 {
 			continue
 		}
