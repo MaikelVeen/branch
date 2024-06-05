@@ -16,15 +16,6 @@
 
 # Installation
 
-## Manual
-To install the command line tool, change to the directory of the folder and run the following command:
-
-```bash
-go install
-```
-
-The `go install` command places the executable into the $GOPATH/bin directory. The command will place generated executables into a sub-directory of $GOPATH named bin. So please make sure that this directory is in your `$PATH` environment variable.
-
 ## Homebrew
 
 The tool is also available on Homebrew using the following commands:
@@ -33,6 +24,17 @@ The tool is also available on Homebrew using the following commands:
 brew tap maikelveen/branch
 brew install branch
 ```
+
+
+## Manual
+
+To install the command line tool, change to the directory of the folder and run the following command:
+
+```bash
+go install
+```
+
+The `go install` command places the executable into the $GOPATH/bin directory. The command will place generated executables into a sub-directory of $GOPATH named bin. So please make sure that this directory is in your `$PATH` environment variable.
 
 # Usage
 

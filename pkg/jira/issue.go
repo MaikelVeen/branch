@@ -27,6 +27,7 @@ func (c *jiraClient) GetIssue(key string) (IssueBean, error) {
 		}
 	}
 
+	resp.Body.Close()
 	return issue, nil
 }
 
