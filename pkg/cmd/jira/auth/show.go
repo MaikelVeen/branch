@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -35,11 +36,11 @@ func NewShowCommand() *ShowCommand {
 	return ac
 }
 
-func (ac *ShowCommand) Execute(cmd *cobra.Command, _ []string) error {
+func (ac *ShowCommand) Execute(_ *cobra.Command, _ []string) error {
 	auth, err := LoadUserContext()
 	// Check for ErrNotFound.
 	if err != nil {
-		if err == keyring.ErrNotFound {
+		if errors.Is(err, keyring.ErrNotFound) {
 			ac.logger.Info("No Jira authentication found")
 			return nil
 		}

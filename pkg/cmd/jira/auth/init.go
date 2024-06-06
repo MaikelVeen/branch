@@ -84,8 +84,7 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 	}
 	auth.User = user
 
-	// Save the user context.
-	if err := auth.Save(); err != nil {
+	if err = auth.Save(); err != nil {
 		return err
 	}
 
@@ -109,7 +108,7 @@ func (c *Context) Save() error {
 		return err
 	}
 
-	if err := keyring.Set(keyringService, keyringUser, string(jsonData)); err != nil {
+	if err = keyring.Set(keyringService, keyringUser, string(jsonData)); err != nil {
 		return fmt.Errorf("failed to set keyring: %w", err)
 	}
 
@@ -124,7 +123,7 @@ func LoadUserContext() (*Context, error) {
 	}
 
 	var c Context
-	if err := json.Unmarshal([]byte(jsonData), &c); err != nil {
+	if err = json.Unmarshal([]byte(jsonData), &c); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal keyring data: %w", err)
 	}
 

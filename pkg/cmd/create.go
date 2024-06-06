@@ -176,13 +176,6 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	return nil
 }
 
-const keyRingService = "branch-cli"
-const keyRingUser = "branch-cli-anon"
-
-func getNewTicketSystem(_ ticket.SystemType) ticket.System {
-	panic("not implemented")
-}
-
 func getAuthenticatedTicketSystem(_ ticket.SystemType) (ticket.System, error) {
 	panic("not implemented")
 }

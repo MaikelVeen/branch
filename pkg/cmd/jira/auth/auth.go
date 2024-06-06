@@ -2,13 +2,13 @@ package auth
 
 import "github.com/spf13/cobra"
 
-// AuthCommand is the parent command for all authentication related commands.
-type AuthCommand struct {
+// RootCommand is the parent command for all authentication related commands.
+type RootCommand struct {
 	Command *cobra.Command
 }
 
-func NewRootCommand() *AuthCommand {
-	cmd := &AuthCommand{}
+func NewRootCommand() *RootCommand {
+	cmd := &RootCommand{}
 	cmd.Command = &cobra.Command{
 		Use: "auth",
 	}
