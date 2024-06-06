@@ -1,7 +1,7 @@
-package cmd
+package jira
 
 import (
-	"github.com/MaikelVeen/branch/pkg/cmd/jira"
+	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -10,14 +10,13 @@ type JiraCommand struct {
 	Command *cobra.Command
 }
 
-func NewJiraCommand() *JiraCommand {
+func NewRootCommand() *JiraCommand {
 	jc := &JiraCommand{}
-
 	jc.Command = &cobra.Command{
 		Use:   "jira",
 		Short: "Interact with Jira",
 	}
 
-	jc.Command.AddCommand(jira.NewAuthenticateCommand().Command)
+	jc.Command.AddCommand(auth.NewRootCommand().Command)
 	return jc
 }
