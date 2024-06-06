@@ -3,6 +3,7 @@ package jira
 import (
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	client "github.com/MaikelVeen/branch/pkg/jira" 
 )
 
 type AuthenticateCommand struct {
@@ -20,14 +21,10 @@ func NewAuthenticateCommand() *AuthenticateCommand {
 	return ac
 }
 
-type AuthDetails struct {
-	Email  string `json:"email"`
-	Domain string `json:"domain"`
-	Token  string `json:"token"`
-}
+
 
 func (ac *AuthenticateCommand) Execute(_ *cobra.Command, _ []string) error {
-	details := &AuthDetails{}
+	details := &client.AuthenticationDetails{}
 
 	form := huh.NewForm(
 		huh.NewGroup(

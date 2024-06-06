@@ -46,13 +46,6 @@ lint: ## Run all available linters
 lint-fix: ## Run all available linters and fix the issues
 	golangci-lint run --timeout=5m --fix
 
-.PHONY: gen
-## Generate:
-gen-jira: ## Generate the JIRA client
-	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
-	oapi-codegen -generate client -package jira -o pkg/jira/client.gen.go pkg/jira/api.json	
-
-
 ## Help:
 help: ## Show this help.
 	@echo ''
