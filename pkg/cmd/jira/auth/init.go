@@ -51,7 +51,7 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Enter your email").
-				Value(&auth.Email),
+				Value(&auth.EmailAddress),
 		),
 		huh.NewGroup(
 			huh.NewInput().
@@ -73,7 +73,7 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 	}
 
 	baseURL := fmt.Sprintf(client.BaseURLTemplate, auth.Subdomain)
-	c, err := client.NewClient(baseURL, client.WithBasicAuthentication(auth.Email, auth.Token))
+	c, err := client.NewClient(baseURL, client.WithBasicAuthentication(auth.EmailAddress, auth.Token))
 	if err != nil {
 		return err
 	}
@@ -96,10 +96,10 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 // Context encapsulates the details needed to authenticate with Jira
 // and the user details, fetched after authentication.
 type Context struct {
-	Email     string       `json:"email"`
-	Subdomain string       `json:"subdomain"`
-	Token     string       `json:"token"`
-	User      *client.User `json:"user"`
+	EmailAddress string       `json:"emailAddress"`
+	Subdomain    string       `json:"subdomain"`
+	Token        string       `json:"token"`
+	User         *client.User `json:"user"` // TODO: Only store display name.
 }
 
 // Save saves the user context to the keyring.

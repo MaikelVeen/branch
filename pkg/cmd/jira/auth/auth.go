@@ -14,5 +14,6 @@ func NewRootCommand() *AuthCommand {
 	}
 
 	cmd.Command.AddCommand(NewInitCommand().Command)
+	cmd.Command.AddCommand(NewShowCommand().Command)
 	return cmd
 }

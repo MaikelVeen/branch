@@ -121,6 +121,7 @@ func checkBaseBranch(git *git.Commander, base string) error {
 		return err
 	}
 
+	// TODO: Replace with huh.
 	if b != base {
 		// Construct a confirmation prompt
 		info := fmt.Sprintf("You are not on the %s branch", base)

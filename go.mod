@@ -5,8 +5,10 @@ go 1.22.2
 require (
 	github.com/charmbracelet/huh v0.4.2
 	github.com/fatih/color v1.13.0
+	github.com/lmittmann/tint v1.0.4
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.9.0
+	github.com/zalando/go-keyring v0.2.4
 	golang.org/x/term v0.6.0
 )
 
@@ -30,7 +32,6 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/lmittmann/tint v1.0.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -44,7 +45,6 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/zalando/go-keyring v0.2.4 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
