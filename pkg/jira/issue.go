@@ -1,44 +1,28 @@
 package jira
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"net/http"
 )
 
-// This resource represents Jira issues.
-type IssueResource interface {
-	// GetIssue returns the details for an issue.
-	GetIssue(key string) (IssueBean, error)
+type IssueResourceService struct {
+	client *Client
 }
 
-func (c *jiraClient) GetIssue(key string) (IssueBean, error) {
-	issue := IssueBean{}
-
-	path := fmt.Sprintf("rest/api/3/issue/%s", key)
-	resp, err := c.B.Call(http.MethodGet, path, c.Email, c.Token, nil, &issue)
+func (i *IssueResourceService) GetIssue(ctx context.Context, key string) (*IssueBean, error) {
+	req, err := i.client.NewRequest(ctx, http.MethodGet, fmt.Sprintf("rest/api/3/issue/%s", key), nil)
 	if err != nil {
-		if resp.StatusCode == http.StatusUnauthorized {
-			return issue, ErrUnauthorized
-		}
-
-		if resp.StatusCode == http.StatusNotFound {
-			return issue, ErrNotFound
-		}
+		return nil, err
 	}
 
-	resp.Body.Close()
+	issue := new(IssueBean)
+	err = i.client.Do(req, issue)
+	if err != nil {
+		return nil, err
+	}
+
 	return issue, nil
-}
-
-func UnmarshalIssueBean(data []byte) (IssueBean, error) {
-	var r IssueBean
-	err := json.Unmarshal(data, &r)
-	return r, err
-}
-
-func (r *IssueBean) Marshal() ([]byte, error) {
-	return json.Marshal(r)
 }
 
 type IssueBean struct {
