@@ -9,7 +9,6 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.9.0
 	github.com/zalando/go-keyring v0.2.4
-	golang.org/x/term v0.6.0
 )
 
 require (

@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/MaikelVeen/branch/pkg/printer"
-	"github.com/MaikelVeen/branch/pkg/prompt"
 	"github.com/MaikelVeen/branch/pkg/ticket"
+	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 )
 
@@ -121,22 +120,18 @@ func checkBaseBranch(git *git.Commander, base string) error {
 		return err
 	}
 
-	// TODO: Replace with huh.
 	if b != base {
-		// Construct a confirmation prompt
-		info := fmt.Sprintf("You are not on the %s branch", base)
-		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
+		var switchBase bool
+		switchForm := huh.NewConfirm().
+			Title("Switch to base branch?").
+			Description("Do you want to switch to the base branch?").
+			Value(&switchBase)
 
-		// Run the prompt.
-		var val string
-		val, err = switchPrompt.Run()
-		if err != nil {
+		if err := switchForm.Run(); err != nil {
 			return err
 		}
 
-		// If return value is yes, checkout base branch.
-		s := strings.ToLower(strings.TrimSpace(val))[0] == 'y'
-		if s {
+		if switchBase {
 			if err = git.Checkout(exec.Command, base); err != nil {
 				return fmt.Errorf("could not checkout the %s branch", base)
 			}

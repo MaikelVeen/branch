@@ -52,8 +52,7 @@ func (gc *GetCommand) Execute(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Print issue
-	fmt.Println(issue)
-
+	// TODO: Add more fields and output as JSON support.
+	gc.logger.Info(fmt.Sprintf("Issue: %s", issue.Fields.Summary))
 	return nil
 }
