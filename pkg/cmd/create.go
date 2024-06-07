@@ -3,23 +3,36 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
 	"os/exec"
+	"time"
 
+	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/MaikelVeen/branch/pkg/git"
-	"github.com/MaikelVeen/branch/pkg/printer"
-	"github.com/MaikelVeen/branch/pkg/ticket"
+	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/charmbracelet/huh"
+	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
 )
 
 const baseBranch = "develop"
 
 type CreateCommand struct {
-	cmd *cobra.Command
+	cmd    *cobra.Command
+	logger *slog.Logger
+	client *jira.Client
 }
 
 func NewCreateCommand() *CreateCommand {
-	cc := &CreateCommand{}
+	cc := &CreateCommand{
+		logger: slog.New(
+			tint.NewHandler(os.Stdout, &tint.Options{
+				Level:      slog.LevelInfo,
+				TimeFormat: time.Kitchen,
+			}),
+		),
+	}
 
 	cc.cmd = &cobra.Command{
 		Use:     "create",
@@ -27,80 +40,47 @@ func NewCreateCommand() *CreateCommand {
 		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
 		RunE:    cc.runCreateCommand,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			c, err := auth.NewClientFromContext(cmd.Context())
+			if err != nil {
+				cc.logger.Warn("a valid auth context is needed for `create`. Run `branch jira auth init` to authenticate.")
+				return err
+			}
+
+			cc.client = c
+			return nil
+		},
 	}
 
 	return cc
 }
 
 func (c *CreateCommand) runCreateCommand(_ *cobra.Command, args []string) error {
-	key := args[0]
-
-	// Get an authenticated ticket system.
-	system, err := getSystem()
-	if err != nil {
-		printer.Error(nil, err)
-		return err
-	}
+	// key := args[0]
 
 	commander := git.NewCommander()
 
-	// Check the preconditions.
-	err = checkPreconditions(key, commander, system)
+	err := checkPreconditions(commander)
 	if err != nil {
-		printer.Warning(err.Error())
-	}
-
-	printer.Print("Key is valid and working from a clean tree")
-
-	err = checkBaseBranch(commander, baseBranch)
-	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not check current branch")
-	}
-
-	ticket, err := system.Ticket(key)
-	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not get ticket")
-	}
-
-	base := system.GetBaseFromTicketType(ticket.Type)
-	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
-
-	err = checkoutOrCreateBranch(branch, commander)
-	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not checkout")
-	}
-
-	printer.Success(fmt.Sprintf("checked out %s", branch))
-
-	return nil
-}
-
-// getSystem returns a ticket system based on the local saved user.
-func getSystem() (ticket.System, error) {
-	// Load the current user from the disk.
-	u, err := ticket.LoadFromDisk()
-	if err != nil {
-		return nil, err
-	}
-
-	system, err := getAuthenticatedTicketSystem(u.System)
-	if err != nil {
-		return nil, err
-	}
-
-	return system, nil
-}
-
-// checkPreconditions returns an error when one of the following checks fails:
-// validity of the key, in git repo and working tree clean.
-func checkPreconditions(key string, git *git.Commander, s ticket.System) error {
-	if err := s.ValidateKey(key); err != nil {
 		return err
 	}
 
+	err = checkBaseBranch(commander, baseBranch)
+	if err != nil {
+		return nil
+	}
+
+	branch := "test"
+	err = checkoutOrCreateBranch(branch, commander)
+	if err != nil {
+		return err
+	}
+
+	c.logger.Info(fmt.Sprintf("checked out %s", branch))
+	return nil
+}
+
+func checkPreconditions(git *git.Commander) error {
 	if _, err := git.Status(exec.Command); err != nil {
 		return errors.New("checking git status failed, are you in a git repo?")
 	}
@@ -169,8 +149,4 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	}
 
 	return nil
-}
-
-func getAuthenticatedTicketSystem(_ ticket.SystemType) (ticket.System, error) {
-	panic("not implemented")
 }
