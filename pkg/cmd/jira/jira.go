@@ -2,21 +2,23 @@ package jira
 
 import (
 	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
+	"github.com/MaikelVeen/branch/pkg/cmd/jira/issue"
 	"github.com/spf13/cobra"
 )
 
-// RootCommand is the parent command for all Jira related commands.
-type RootCommand struct {
+// RootJiraCommand is the parent command for all Jira related commands.
+type RootJiraCommand struct {
 	Command *cobra.Command
 }
 
-func NewRootCommand() *RootCommand {
-	jc := &RootCommand{}
+func NewCommand() *RootJiraCommand {
+	jc := &RootJiraCommand{}
 	jc.Command = &cobra.Command{
 		Use:   "jira",
 		Short: "Interact with Jira",
 	}
 
-	jc.Command.AddCommand(auth.NewRootCommand().Command)
+	jc.Command.AddCommand(auth.NewCommand().Command)
+	jc.Command.AddCommand(issue.NewCommand().Command)
 	return jc
 }

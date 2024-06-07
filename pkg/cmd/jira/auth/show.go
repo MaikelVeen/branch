@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
-	"github.com/zalando/go-keyring"
 )
 
 type ShowCommand struct {
@@ -29,8 +27,9 @@ func NewShowCommand() *ShowCommand {
 
 	ac.Command = &cobra.Command{
 		Use:   "show",
-		Short: "Show the Jira authentication",
+		Short: "Display the current Jira auth context",
 		RunE:  ac.Execute,
+		Args:  cobra.NoArgs,
 	}
 
 	return ac
@@ -38,14 +37,13 @@ func NewShowCommand() *ShowCommand {
 
 func (ac *ShowCommand) Execute(_ *cobra.Command, _ []string) error {
 	auth, err := LoadUserContext()
-	// Check for ErrNotFound.
 	if err != nil {
-		if errors.Is(err, keyring.ErrNotFound) {
-			ac.logger.Info("No Jira authentication found")
-			return nil
-		}
-
 		ac.logger.Error(err.Error())
+	}
+
+	if auth == nil {
+		ac.logger.Info("No authentication context found")
+		return nil
 	}
 
 	ac.logger.Info(fmt.Sprintf("Authenticated as %s(%s)", auth.DisplayName, auth.EmailAddress))

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -10,14 +9,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
-	"github.com/zalando/go-keyring"
-
-	client "github.com/MaikelVeen/branch/pkg/jira"
-)
-
-const (
-	keyringService = "branch_jira"
-	keyringUser    = "branch"
 )
 
 type InitCommand struct {
@@ -39,6 +30,7 @@ func NewInitCommand() *InitCommand {
 		Use:   "init",
 		Short: "Initialize the Jira authentication",
 		RunE:  ac.Execute,
+		Args:  cobra.NoArgs,
 	}
 
 	return ac
@@ -72,8 +64,7 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	baseURL := fmt.Sprintf(client.BaseURLTemplate, auth.Subdomain)
-	c, err := client.NewClient(baseURL, client.WithBasicAuthentication(auth.EmailAddress, auth.Token))
+	c, err := newClient(auth)
 	if err != nil {
 		return err
 	}
@@ -90,42 +81,4 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 
 	ac.logger.Info(fmt.Sprintf("Successfully authenticated as %s, saved credentials to keyring", user.DisplayName))
 	return nil
-}
-
-// Context encapsulates the details needed to authenticate with Jira
-// and the user details, fetched after authentication.
-type Context struct {
-	EmailAddress string `json:"emailAddress"`
-	Subdomain    string `json:"subdomain"`
-	Token        string `json:"token"`
-	DisplayName  string `json:"displayName"`
-}
-
-// Save saves the user context to the keyring.
-func (c *Context) Save() error {
-	jsonData, err := json.Marshal(c)
-	if err != nil {
-		return err
-	}
-
-	if err = keyring.Set(keyringService, keyringUser, string(jsonData)); err != nil {
-		return fmt.Errorf("failed to set keyring: %w", err)
-	}
-
-	return nil
-}
-
-// Load loads the user context from the keyring.
-func LoadUserContext() (*Context, error) {
-	jsonData, err := keyring.Get(keyringService, keyringUser)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get keyring: %w", err)
-	}
-
-	var c Context
-	if err = json.Unmarshal([]byte(jsonData), &c); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal keyring data: %w", err)
-	}
-
-	return &c, nil
 }
