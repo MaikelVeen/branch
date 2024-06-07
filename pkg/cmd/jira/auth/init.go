@@ -13,11 +13,12 @@ import (
 
 type InitCommand struct {
 	Command *cobra.Command
-	logger  *slog.Logger
+
+	logger *slog.Logger
 }
 
 func NewInitCommand() *InitCommand {
-	ac := &InitCommand{
+	cmd := &InitCommand{
 		logger: slog.New(
 			tint.NewHandler(os.Stdout, &tint.Options{
 				Level:      slog.LevelInfo,
@@ -26,14 +27,14 @@ func NewInitCommand() *InitCommand {
 		),
 	}
 
-	ac.Command = &cobra.Command{
+	cmd.Command = &cobra.Command{
 		Use:   "init",
 		Short: "Initialize the Jira authentication",
-		RunE:  ac.Execute,
+		RunE:  cmd.Execute,
 		Args:  cobra.NoArgs,
 	}
 
-	return ac
+	return cmd
 }
 
 func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {

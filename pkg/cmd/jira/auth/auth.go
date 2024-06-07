@@ -12,6 +12,8 @@ import (
 	client "github.com/MaikelVeen/branch/pkg/jira"
 )
 
+var ErrAuthContextMissing = errors.New("auth context not present")
+
 // RootAuthCommand is the parent command for all authentication related commands.
 type RootAuthCommand struct {
 	Command *cobra.Command
@@ -67,9 +69,8 @@ func LoadUserContext() (*Context, error) {
 	jsonData, err := keyring.Get(keyringService, keyringUser)
 	if err != nil {
 		if errors.Is(err, keyring.ErrNotFound) {
-			return nil, nil
+			return nil, ErrAuthContextMissing
 		}
-
 		return nil, fmt.Errorf("failed to get keyring: %w", err)
 	}
 

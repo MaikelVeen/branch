@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -16,7 +17,7 @@ type ShowCommand struct {
 }
 
 func NewShowCommand() *ShowCommand {
-	ac := &ShowCommand{
+	cmd := &ShowCommand{
 		logger: slog.New(
 			tint.NewHandler(os.Stdout, &tint.Options{
 				Level:      slog.LevelInfo,
@@ -25,27 +26,26 @@ func NewShowCommand() *ShowCommand {
 		),
 	}
 
-	ac.Command = &cobra.Command{
+	cmd.Command = &cobra.Command{
 		Use:   "show",
 		Short: "Display the current Jira auth context",
-		RunE:  ac.Execute,
+		RunE:  cmd.Execute,
 		Args:  cobra.NoArgs,
 	}
 
-	return ac
+	return cmd
 }
 
-func (ac *ShowCommand) Execute(_ *cobra.Command, _ []string) error {
+func (cmd *ShowCommand) Execute(_ *cobra.Command, _ []string) error {
 	auth, err := LoadUserContext()
 	if err != nil {
-		ac.logger.Error(err.Error())
+		if errors.Is(err, ErrAuthContextMissing) {
+			cmd.logger.Info("No authentication context found")
+			return nil
+		}
+		cmd.logger.Error(err.Error())
 	}
 
-	if auth == nil {
-		ac.logger.Info("No authentication context found")
-		return nil
-	}
-
-	ac.logger.Info(fmt.Sprintf("Authenticated as %s(%s)", auth.DisplayName, auth.EmailAddress))
+	cmd.logger.Info(fmt.Sprintf("Authenticated as %s(%s)", auth.DisplayName, auth.EmailAddress))
 	return nil
 }

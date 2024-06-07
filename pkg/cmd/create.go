@@ -22,6 +22,7 @@ type CreateCommand struct {
 	cmd    *cobra.Command
 	logger *slog.Logger
 	client *jira.Client
+	git    *git.Commander
 }
 
 func NewCreateCommand() *CreateCommand {
@@ -32,6 +33,7 @@ func NewCreateCommand() *CreateCommand {
 				TimeFormat: time.Kitchen,
 			}),
 		),
+		git: git.NewCommander(),
 	}
 
 	cc.cmd = &cobra.Command{
@@ -39,8 +41,10 @@ func NewCreateCommand() *CreateCommand {
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
-		RunE:    cc.runCreateCommand,
+		RunE:    cc.Execute,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			runParentPersistentPreRun(cmd, args)
+
 			c, err := auth.NewClientFromContext(cmd.Context())
 			if err != nil {
 				cc.logger.Warn("a valid auth context is needed for `create`. Run `branch jira auth init` to authenticate.")
@@ -55,24 +59,21 @@ func NewCreateCommand() *CreateCommand {
 	return cc
 }
 
-func (c *CreateCommand) runCreateCommand(_ *cobra.Command, args []string) error {
+func (c *CreateCommand) Execute(_ *cobra.Command, _ []string) error {
 	// key := args[0]
 
-	commander := git.NewCommander()
-
-	err := checkPreconditions(commander)
+	err := c.checkPreconditions()
 	if err != nil {
 		return err
 	}
 
-	err = checkBaseBranch(commander, baseBranch)
-	if err != nil {
-		return nil
+	if err = c.checkBaseBranch(baseBranch); err != nil {
+		return err
 	}
 
+	// TODO: Get issue and construct branch name.
 	branch := "test"
-	err = checkoutOrCreateBranch(branch, commander)
-	if err != nil {
+	if err = c.checkoutOrCreateBranch(branch); err != nil {
 		return err
 	}
 
@@ -80,12 +81,12 @@ func (c *CreateCommand) runCreateCommand(_ *cobra.Command, args []string) error 
 	return nil
 }
 
-func checkPreconditions(git *git.Commander) error {
-	if _, err := git.Status(exec.Command); err != nil {
+func (c *CreateCommand) checkPreconditions() error {
+	if _, err := c.git.Status(exec.Command); err != nil {
 		return errors.New("checking git status failed, are you in a git repo?")
 	}
 
-	if err := git.DiffIndex(exec.Command, "HEAD"); err != nil {
+	if err := c.git.DiffIndex(exec.Command, "HEAD"); err != nil {
 		return errors.New("working tree is not clean, aborting")
 	}
 
@@ -94,25 +95,24 @@ func checkPreconditions(git *git.Commander) error {
 
 // checkBaseBranch checks if the configured base branch is currently
 // set and ask if the user wants to switch if that is not the case.
-func checkBaseBranch(git *git.Commander, base string) error {
-	b, err := git.ShortSymbolicRef(exec.Command)
+func (c *CreateCommand) checkBaseBranch(base string) error {
+	b, err := c.git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
 	}
 
 	if b != base {
 		var switchBase bool
-		switchForm := huh.NewConfirm().
+		if err = huh.NewConfirm().
 			Title("Switch to base branch?").
 			Description("Do you want to switch to the base branch?").
-			Value(&switchBase)
-
-		if err := switchForm.Run(); err != nil {
+			Value(&switchBase).
+			Run(); err != nil {
 			return err
 		}
 
 		if switchBase {
-			if err = git.Checkout(exec.Command, base); err != nil {
+			if err = c.git.Checkout(exec.Command, base); err != nil {
 				return fmt.Errorf("could not checkout the %s branch", base)
 			}
 		}
@@ -123,8 +123,8 @@ func checkBaseBranch(git *git.Commander, base string) error {
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
 // Then checks if `b` exists, if not creates it and checks it out.
-func checkoutOrCreateBranch(b string, git *git.Commander) error {
-	current, err := git.ShortSymbolicRef(exec.Command)
+func (cmd *CreateCommand) checkoutOrCreateBranch(b string) error {
+	current, err := cmd.git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
 	}
@@ -134,16 +134,16 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	}
 
 	// TODO: return pretty errors, or just the errors that the command returns
-	err = git.ShowRef(exec.Command, b)
+	err = cmd.git.ShowRef(exec.Command, b)
 	if err != nil {
 		// ShowRef returns error when branch does not exist.
-		err = git.Branch(exec.Command, b)
+		err = cmd.git.Branch(exec.Command, b)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = git.Checkout(exec.Command, b)
+	err = cmd.git.Checkout(exec.Command, b)
 	if err != nil {
 		return err
 	}
