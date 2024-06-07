@@ -15,12 +15,12 @@ import (
 
 const baseBranch = "develop"
 
-type createCmd struct {
+type CreateCommand struct {
 	cmd *cobra.Command
 }
 
-func newCreateCommand() *createCmd {
-	cc := &createCmd{}
+func NewCreateCommand() *CreateCommand {
+	cc := &CreateCommand{}
 
 	cc.cmd = &cobra.Command{
 		Use:     "create",
@@ -33,7 +33,7 @@ func newCreateCommand() *createCmd {
 	return cc
 }
 
-func (c *createCmd) runCreateCommand(_ *cobra.Command, args []string) error {
+func (c *CreateCommand) runCreateCommand(_ *cobra.Command, args []string) error {
 	key := args[0]
 
 	// Get an authenticated ticket system.

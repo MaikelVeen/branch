@@ -82,7 +82,7 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	auth.User = user
+	auth.DisplayName = user.DisplayName
 
 	if err = auth.Save(); err != nil {
 		return err
@@ -95,10 +95,10 @@ func (ac *InitCommand) Execute(cmd *cobra.Command, _ []string) error {
 // Context encapsulates the details needed to authenticate with Jira
 // and the user details, fetched after authentication.
 type Context struct {
-	EmailAddress string       `json:"emailAddress"`
-	Subdomain    string       `json:"subdomain"`
-	Token        string       `json:"token"`
-	User         *client.User `json:"user"` // TODO: Only store display name.
+	EmailAddress string `json:"emailAddress"`
+	Subdomain    string `json:"subdomain"`
+	Token        string `json:"token"`
+	DisplayName  string `json:"displayName"`
 }
 
 // Save saves the user context to the keyring.

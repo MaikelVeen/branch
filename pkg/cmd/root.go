@@ -22,7 +22,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(newCreateCommand().cmd)
+	rootCmd.AddCommand(NewCreateCommand().cmd)
 	rootCmd.AddCommand(newPullRequestCommand().cmd)
 	rootCmd.AddCommand(jira.NewRootCommand().Command)
 }

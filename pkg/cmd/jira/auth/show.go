@@ -48,6 +48,6 @@ func (ac *ShowCommand) Execute(_ *cobra.Command, _ []string) error {
 		ac.logger.Error(err.Error())
 	}
 
-	ac.logger.Info(fmt.Sprintf("Authenticated as %s(%s)", auth.User.DisplayName, auth.EmailAddress))
+	ac.logger.Info(fmt.Sprintf("Authenticated as %s(%s)", auth.DisplayName, auth.EmailAddress))
 	return nil
 }
