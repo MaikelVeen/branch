@@ -15,4 +15,5 @@
 # vendor/
 
 # Internal TODO list.
-TODO.md 
+TODO.md
+config.yaml 

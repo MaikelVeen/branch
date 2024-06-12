@@ -14,13 +14,13 @@ import (
 
 var ErrAuthContextMissing = errors.New("auth context not present")
 
-// RootAuthCommand is the parent command for all authentication related commands.
-type RootAuthCommand struct {
+// Command is the parent command for all authentication related commands.
+type Command struct {
 	Command *cobra.Command
 }
 
-func NewCommand() *RootAuthCommand {
-	cmd := &RootAuthCommand{}
+func NewCommand() *Command {
+	cmd := &Command{}
 	cmd.Command = &cobra.Command{
 		Use:   "auth",
 		Short: "Commands to authenticate with Jira",

@@ -6,20 +6,17 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 	"time"
 
+	"github.com/MaikelVeen/branch/pkg/cmd/config"
 	"github.com/MaikelVeen/branch/pkg/cmd/jira"
 	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-)
 
-const (
-	defaultConfigFilename = ".branchconfig"
-	envPrefix             = "BRANCH"
+	cfg "github.com/MaikelVeen/branch/pkg/config"
 )
 
 var rootCmd = &cobra.Command{
@@ -66,6 +63,7 @@ func init() {
 	rootCmd.AddCommand(NewCreateCommand().cmd)
 	rootCmd.AddCommand(newPullRequestCommand().cmd)
 	rootCmd.AddCommand(jira.NewCommand().Command)
+	rootCmd.AddCommand(config.NewCommand().Command)
 }
 
 func runParentPersistentPreRun(cmd *cobra.Command, args []string) {
@@ -77,25 +75,12 @@ func runParentPersistentPreRun(cmd *cobra.Command, args []string) {
 }
 
 func initializeConfig(cmd *cobra.Command) error {
-	v := viper.New()
-
-	v.SetConfigName(defaultConfigFilename)
-	v.AddConfigPath("$HOME")
-	v.AddConfigPath(".")
-
-	var cfgNotFoundError viper.ConfigFileNotFoundError
-	if err := v.ReadInConfig(); err != nil {
-		if !errors.As(err, &cfgNotFoundError) {
-			return err
-		}
+	v, err := cfg.Init()
+	if err != nil {
+		return err
 	}
 
-	v.SetEnvPrefix(envPrefix)
-	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	v.AutomaticEnv()
-
 	bindFlags(cmd, v)
-
 	return nil
 }
 

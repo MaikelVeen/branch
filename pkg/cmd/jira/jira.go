@@ -5,13 +5,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RootJiraCommand is the parent command for all Jira related commands.
-type RootJiraCommand struct {
+// Command is the parent command for all Jira related commands.
+type Command struct {
 	Command *cobra.Command
 }
 
-func NewCommand() *RootJiraCommand {
-	jc := &RootJiraCommand{}
+func NewCommand() *Command {
+	jc := &Command{}
 	jc.Command = &cobra.Command{
 		Use:   "jira",
 		Short: "Interact with Jira",
