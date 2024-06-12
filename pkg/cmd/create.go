@@ -123,8 +123,8 @@ func (c *CreateCommand) checkBaseBranch(base string) error {
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
 // Then checks if `b` exists, if not creates it and checks it out.
-func (cmd *CreateCommand) checkoutOrCreateBranch(b string) error {
-	current, err := cmd.git.ShortSymbolicRef(exec.Command)
+func (c *CreateCommand) checkoutOrCreateBranch(b string) error {
+	current, err := c.git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
 	}
@@ -134,16 +134,16 @@ func (cmd *CreateCommand) checkoutOrCreateBranch(b string) error {
 	}
 
 	// TODO: return pretty errors, or just the errors that the command returns
-	err = cmd.git.ShowRef(exec.Command, b)
+	err = c.git.ShowRef(exec.Command, b)
 	if err != nil {
 		// ShowRef returns error when branch does not exist.
-		err = cmd.git.Branch(exec.Command, b)
+		err = c.git.Branch(exec.Command, b)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = cmd.git.Checkout(exec.Command, b)
+	err = c.git.Checkout(exec.Command, b)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package jira
 
 import (
 	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
-	"github.com/MaikelVeen/branch/pkg/cmd/jira/issue"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +18,5 @@ func NewCommand() *RootJiraCommand {
 	}
 
 	jc.Command.AddCommand(auth.NewCommand().Command)
-	jc.Command.AddCommand(issue.NewCommand().Command)
 	return jc
 }
