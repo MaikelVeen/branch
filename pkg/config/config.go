@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
+	"os/user"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -13,8 +15,10 @@ var (
 )
 
 const (
-	KeyPattern            = "pattern"
+	KeyPattern = "pattern"
+
 	defaultConfigFilename = "config"
+	path                  = "$HOME/.config/branch/"
 	envPrefix             = "BRANCH"
 )
 
@@ -23,11 +27,16 @@ type Config struct {
 	Pattern *string `yaml:"pattern"`
 }
 
-// ConfigOption represents a configuration option that can be displayed to the user.
-type ConfigOption struct {
+func (c *Config) Save() error {
+	return configuration.WriteConfig()
+}
+
+// Option represents a configuration option that can be displayed to the user.
+type Option struct {
 	Key          string
 	Description  string
 	CurrentValue func(cfg Config) *string
+	SetValue     func(cfg *Config, value string) error
 }
 
 // Load loads the configuration from the environment.
@@ -42,31 +51,38 @@ func Load() (*Config, error) {
 	}
 
 	return &cfg, nil
-
 }
 
 // Options is a list of all available configuration options.
-var Options = map[string]*ConfigOption{
+var Options = map[string]*Option{
 	KeyPattern: {
 		Key:          KeyPattern,
 		Description:  "The pattern to use for branch names",
 		CurrentValue: func(cfg Config) *string { return cfg.Pattern },
+		SetValue: func(cfg *Config, value string) error {
+			cfg.Pattern = &value
+			configuration.Set(KeyPattern, value)
+			return nil
+		},
 	},
 }
 
 func Init() (*viper.Viper, error) {
-	fmt.Println("initializeConfig")
 	v := viper.New()
 
 	v.SetConfigName(defaultConfigFilename)
 	v.SetConfigType("yaml")
-	v.AddConfigPath("$HOME/.branch/")
-	v.AddConfigPath(".")
+	v.AddConfigPath(path)
 
-	var cfgNotFoundError viper.ConfigFileNotFoundError
 	if err := v.ReadInConfig(); err != nil {
-		if !errors.As(err, &cfgNotFoundError) {
-			return nil, err
+		var e viper.ConfigFileNotFoundError
+		if errors.As(err, &e) {
+			// If the configuration file is not found, create it.
+			if err = createDefaultConfigFile(); err != nil {
+				return nil, fmt.Errorf("failed to write default configuration: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to read configuration: %w", err)
 		}
 	}
 
@@ -76,4 +92,19 @@ func Init() (*viper.Viper, error) {
 
 	configuration = v
 	return v, nil
+}
+
+func createDefaultConfigFile() error {
+	usr, err := user.Current()
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%s/.config/branch", usr.HomeDir)
+	if err = os.MkdirAll(path, 0755); err != nil {
+		return err
+	}
+
+	fn := fmt.Sprintf("%s/%s.yaml", path, "defaultConfigFilename")
+	return os.WriteFile(fn, []byte(""), 0600)
 }

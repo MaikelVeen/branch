@@ -24,16 +24,30 @@ func NewSetCommand() *SetCommand {
 
 func (c *SetCommand) Execute(_ *cobra.Command, args []string) error {
 	key := args[0]
-	_ = args[1]
+	value := args[1]
 
-	if _, err := ValididateKey(key); err != nil {
+	opt, err := ValididateKey(key)
+	if err != nil {
+		return err
+	}
+
+	config, err := cfg.Load()
+	if err != nil {
+		return err
+	}
+
+	if err = opt.SetValue(config, value); err != nil {
+		return err
+	}
+
+	if err = config.Save(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func ValididateKey(key string) (*cfg.ConfigOption, error) {
+func ValididateKey(key string) (*cfg.Option, error) {
 	if _, ok := cfg.Options[key]; !ok {
 		return nil, ErrInvalidKey
 	}
