@@ -77,31 +77,3 @@ func TestFilter(t *testing.T) {
 		}
 	})
 }
-
-func TestGetBranchName(t *testing.T) {
-	testCases := map[string]struct {
-		base   string
-		key    string
-		title  string
-		expect string
-	}{
-		"feature branch": {
-			base:   "feature",
-			key:    "DONUT-25",
-			title:  "We need to fix this issue",
-			expect: "feature/DONUT-25/we-need-to-fix-this-issue",
-		},
-		"hotfix branch": {
-			base:   "hotfix",
-			key:    "DONUT-26",
-			title:  "Also this issue needs some love",
-			expect: "hotfix/DONUT-26/also-this-issue-needs-some-love",
-		},
-	}
-
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.expect, git.GetBranchName(tc.base, tc.key, tc.title))
-		})
-	}
-}

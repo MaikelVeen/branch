@@ -1,7 +1,6 @@
 package git
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -48,11 +47,4 @@ func GetLengthWithUpperbound(s []string, m int) int {
 	}
 
 	return l
-}
-
-func GetBranchName(base, key, title string) string {
-	//TODO: should we check key and base here to also valid for refname?
-	ref := FormatAsValidRef(title)
-
-	return fmt.Sprintf("%s/%s/%s", base, key, ref)
 }
