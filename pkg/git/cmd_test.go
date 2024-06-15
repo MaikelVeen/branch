@@ -41,6 +41,7 @@ func TestExecuteStatus(t *testing.T) {
 
 func TestExecuteBranch(t *testing.T) {
 	t.Parallel()
+
 	cmd := git.NewCommander()
 	b := "feature"
 
@@ -50,7 +51,7 @@ func TestExecuteBranch(t *testing.T) {
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessSuccess", exp)
-		err := cmd.Branch(cmdCtx, b)
+		_, err := cmd.Branch(cmdCtx, b)
 
 		require.NoError(t, err)
 	})
@@ -61,7 +62,7 @@ func TestExecuteBranch(t *testing.T) {
 		exp := fmt.Sprintf("git branch %s", b)
 
 		cmdCtx := getFakeCommand(t, "TestShellProcessFail", exp)
-		err := cmd.Branch(cmdCtx, b)
+		_, err := cmd.Branch(cmdCtx, b)
 
 		require.Error(t, err)
 	})

@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	StatusCmd   string = "status"
-	BranchCmd   string = "branch"
-	CheckoutCmd string = "checkout"
+	GitCommand string = "git"
+
+	StatusCommand   string = "status"
+	BranchCommand   string = "branch"
+	CheckoutCommand string = "checkout"
 )
 
 // ExecContext is a function that returns an external command being prepared or run
@@ -29,7 +31,7 @@ func executewithOutput(ctx ExecContext, name string, args ...string) (string, er
 	cmd := []string{name}
 	cmd = append(cmd, args...)
 
-	out, err := ctx("git", cmd...).Output()
+	out, err := ctx(GitCommand, cmd...).Output()
 	if err != nil {
 		return "", err
 	}
@@ -42,16 +44,15 @@ func executewithOutput(ctx ExecContext, name string, args ...string) (string, er
 //
 //  https://git-scm.com/docs/git-status
 func (g *Commander) Status(ctx ExecContext, args ...string) (string, error) {
-	return executewithOutput(ctx, StatusCmd, args...)
+	return executewithOutput(ctx, StatusCommand, args...)
 }
 
-// Branch executes `git branch <b>` where b represents
-// the branch name. Returns an error if command execution fails.
+// Branch executes `git branch <args>` and returns
+// the output and an error if the command execution fails.
 //
 // https://git-scm.com/docs/git-branch
-func (g *Commander) Branch(ctx ExecContext, b string) error {
-	cmd := ctx("git", "branch", b)
-	return cmd.Run()
+func (g *Commander) Branch(ctx ExecContext, args ...string) (string, error) {
+	return executewithOutput(ctx, BranchCommand, args...)
 }
 
 // Checkout executes `git branch <b>` where b represents
