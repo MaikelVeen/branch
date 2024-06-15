@@ -1,21 +1,14 @@
 # Branch 
 
-```
- ________      ________      ________      ________       ________      ___  ___     
-|\   __  \    |\   __  \    |\   __  \    |\   ___  \    |\   ____\    |\  \|\  \    
-\ \  \|\ /_   \ \  \|\  \   \ \  \|\  \   \ \  \\ \  \   \ \  \___|    \ \  \\\  \   
- \ \   __  \   \ \   _  _\   \ \   __  \   \ \  \\ \  \   \ \  \        \ \   __  \  
-  \ \  \|\  \   \ \  \\  \|   \ \  \ \  \   \ \  \\ \  \   \ \  \____    \ \  \ \  \ 
-   \ \_______\   \ \__\\ _\    \ \__\ \__\   \ \__\\ \__\   \ \_______\   \ \__\ \__\
-    \|_______|    \|__|\|__|    \|__|\|__|    \|__| \|__|    \|_______|    \|__|\|__|
-                                                                                     
-```
----
-
 `branch` is a command line utility that provides useful shortcuts when working with git and Jira.
+
+## Features
+- Create Branches: Quickly create branches based on ticket identifiers and templates.
+- Jira Integration: Authenticate and interact with Jira from the command line.
 
 # Installation
 
+## Homebrew
 
 ```
 brew tap maikelveen/branch
@@ -33,7 +26,7 @@ branch jira auth init
 Configure the branch template:
 
 ```bash
-branch config set template "{{issue.key}}/{{issue.summary}}"
+branch config set template "{{.key}}/{{.summary}}"
 ```
 
 Create a new branch:
