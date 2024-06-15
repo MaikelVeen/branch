@@ -3,111 +3,122 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
+	"text/template"
+	"time"
 
+	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/MaikelVeen/branch/pkg/jira"
-	"github.com/MaikelVeen/branch/pkg/printer"
-	"github.com/MaikelVeen/branch/pkg/prompt"
-	"github.com/MaikelVeen/branch/pkg/ticket"
+	"github.com/charmbracelet/huh"
+	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-const baseBranch = "develop"
+const (
+	ArgBase          = "base"
+	ArgBaseShort     = "b"
+	ArgTemplate      = "template"
+	ArgTemplateShort = "t"
+)
 
-type createCmd struct {
-	cmd *cobra.Command
+type CreateCommand struct {
+	Command *cobra.Command
+
+	logger *slog.Logger
+	git    *git.Commander
+
+	Template   string
+	BaseBranch string // TODO: Make configurable.
 }
 
-func newCreateCommand() *createCmd {
-	cc := &createCmd{}
+func NewCreateCommand() *CreateCommand {
+	cc := &CreateCommand{
+		logger: slog.New(
+			tint.NewHandler(os.Stdout, &tint.Options{
+				Level:      slog.LevelInfo,
+				TimeFormat: time.Kitchen,
+			}),
+		),
+		git: git.NewCommander(),
+	}
 
-	cc.cmd = &cobra.Command{
+	cc.Command = &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
-		RunE:    cc.runCreateCommand,
+		RunE:    cc.Execute,
 	}
+
+	flagset := cc.Command.Flags()
+
+	flagset.StringVarP(
+		&cc.Template,
+		ArgTemplate,
+		ArgTemplateShort,
+		"{{.type}}/{{.key}}-{{.summary}}",
+		"Template to use for branch name",
+	)
+	_ = viper.BindPFlag(ArgTemplate, flagset.Lookup(ArgTemplate))
+
+	flagset.StringVarP(
+		&cc.BaseBranch,
+		ArgBase,
+		ArgBaseShort,
+		"main",
+		"Base branch to create the new branch from",
+	)
+	_ = viper.BindPFlag(ArgBase, flagset.Lookup(ArgBase))
 
 	return cc
 }
 
-func (c *createCmd) runCreateCommand(_ *cobra.Command, args []string) error {
-	key := args[0]
-
-	// Get an authenticated ticket system.
-	system, err := getSystem()
+func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
+	client, err := auth.NewClientFromContext(cmd.Context())
 	if err != nil {
-		printer.Error(nil, err)
+		c.logger.Warn("a valid auth context is needed for `create`. Run `branch jira auth init` to authenticate.")
 		return err
 	}
 
-	commander := git.NewCommander()
-
-	// Check the preconditions.
-	err = checkPreconditions(key, commander, system)
-	if err != nil {
-		printer.Warning(err.Error())
+	if err = c.checkPreconditions(); err != nil {
+		return err
 	}
 
-	printer.Print("Key is valid and working from a clean tree")
-
-	err = checkBaseBranch(commander, baseBranch)
-	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not check current branch")
+	if err = c.checkBaseBranch(c.BaseBranch); err != nil {
+		return err
 	}
 
-	ticket, err := system.Ticket(key)
+	key := args[0]
+	issue, err := client.Issue.GetIssue(cmd.Context(), key)
 	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not get ticket")
+		c.logger.Error(fmt.Errorf("failed to get issue: %w", err).Error())
+		return err
 	}
 
-	base := system.GetBaseFromTicketType(ticket.Type)
-	branch := git.GetBranchName(base, ticket.Key, ticket.Title)
-
-	err = checkoutOrCreateBranch(branch, commander)
+	branch, err := BranchNameFromTemplate(c.Template, issue)
 	if err != nil {
-		printer.Error(nil, err)
-		return errors.New("could not checkout")
+		return err
 	}
 
-	printer.Success(fmt.Sprintf("checked out %s", branch))
+	if err = c.checkoutOrCreateBranch(branch); err != nil {
+		return err
+	}
 
+	c.logger.Info(fmt.Sprintf("checked out %s", branch))
 	return nil
 }
 
-// getSystem returns a ticket system based on the local saved user.
-func getSystem() (ticket.System, error) {
-	// Load the current user from the disk.
-	u, err := ticket.LoadFromDisk()
-	if err != nil {
-		return nil, err
-	}
-
-	system, err := getAuthenticatedTicketSystem(u.System)
-	if err != nil {
-		return nil, err
-	}
-
-	return system, nil
-}
-
-// checkPreconditions returns an error when one of the following checks fails:
-// validity of the key, in git repo and working tree clean.
-func checkPreconditions(key string, git *git.Commander, s ticket.System) error {
-	if err := s.ValidateKey(key); err != nil {
-		return err
-	}
-
-	if _, err := git.Status(exec.Command); err != nil {
+func (c *CreateCommand) checkPreconditions() error {
+	if _, err := c.git.Status(exec.Command); err != nil {
 		return errors.New("checking git status failed, are you in a git repo?")
 	}
 
-	if err := git.DiffIndex(exec.Command, "HEAD"); err != nil {
+	if err := c.git.DiffIndex(exec.Command, "HEAD"); err != nil {
 		return errors.New("working tree is not clean, aborting")
 	}
 
@@ -116,28 +127,24 @@ func checkPreconditions(key string, git *git.Commander, s ticket.System) error {
 
 // checkBaseBranch checks if the configured base branch is currently
 // set and ask if the user wants to switch if that is not the case.
-func checkBaseBranch(git *git.Commander, base string) error {
-	b, err := git.ShortSymbolicRef(exec.Command)
+func (c *CreateCommand) checkBaseBranch(base string) error {
+	b, err := c.git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
 	}
 
 	if b != base {
-		// Construct a confirmation prompt
-		info := fmt.Sprintf("You are not on the %s branch", base)
-		switchPrompt := prompt.GetConfirmationPrompt("Do you want to switch ? [y/n]", []string{info})
-
-		// Run the prompt.
-		var val string
-		val, err = switchPrompt.Run()
-		if err != nil {
+		var switchBase bool
+		if err = huh.NewConfirm().
+			Title("Switch to base branch?").
+			Description("Do you want to switch to the base branch?").
+			Value(&switchBase).
+			Run(); err != nil {
 			return err
 		}
 
-		// If return value is yes, checkout base branch.
-		s := strings.ToLower(strings.TrimSpace(val))[0] == 'y'
-		if s {
-			if err = git.Checkout(exec.Command, base); err != nil {
+		if switchBase {
+			if err = c.git.Checkout(exec.Command, base); err != nil {
 				return fmt.Errorf("could not checkout the %s branch", base)
 			}
 		}
@@ -148,8 +155,8 @@ func checkBaseBranch(git *git.Commander, base string) error {
 
 // checkoutOrCreateBranch checks if current branch equals `b`, if true returns nil.
 // Then checks if `b` exists, if not creates it and checks it out.
-func checkoutOrCreateBranch(b string, git *git.Commander) error {
-	current, err := git.ShortSymbolicRef(exec.Command)
+func (c *CreateCommand) checkoutOrCreateBranch(b string) error {
+	current, err := c.git.ShortSymbolicRef(exec.Command)
 	if err != nil {
 		return err
 	}
@@ -159,16 +166,16 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	}
 
 	// TODO: return pretty errors, or just the errors that the command returns
-	err = git.ShowRef(exec.Command, b)
+	err = c.git.ShowRef(exec.Command, b)
 	if err != nil {
 		// ShowRef returns error when branch does not exist.
-		err = git.Branch(exec.Command, b)
+		err = c.git.Branch(exec.Command, b)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = git.Checkout(exec.Command, b)
+	err = c.git.Checkout(exec.Command, b)
 	if err != nil {
 		return err
 	}
@@ -176,13 +183,23 @@ func checkoutOrCreateBranch(b string, git *git.Commander) error {
 	return nil
 }
 
-const keyRingService = "branch-cli"
-const keyRingUser = "branch-cli-anon"
+// BranchNameFromTemplate generates a branch name from a given template and Jira issue.
+func BranchNameFromTemplate(tmpl string, issue *jira.Issue) (string, error) {
+	t, err := template.New("branchName").Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
 
-func getNewTicketSystem(_ ticket.SystemType) ticket.System {
-	return jira.NewJira(keyRingService, keyRingUser)
-}
+	params := map[string]string{
+		"key":     issue.Key,
+		"type":    strings.ToLower(issue.Fields.Issuetype.Name),
+		"summary": git.FormatAsValidRef(issue.Fields.Summary),
+	}
 
-func getAuthenticatedTicketSystem(_ ticket.SystemType) (ticket.System, error) {
-	return jira.NewAuthenticatedJira(keyRingService, keyRingUser)
+	var b strings.Builder
+	if err = t.Execute(&b, params); err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }

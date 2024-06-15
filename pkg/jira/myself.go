@@ -1,40 +1,27 @@
 package jira
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 )
 
-// This resource represents information about the current user, such as basic details, group membership,
-// application roles, preferences, and locale. Use it to get, create, update, and delete (restore default)
-// values of the user's preferences and locale.
-type MyselfResource interface {
-	// GetCurrentUser returns details for the current user.
-	GetCurrentUser() (User, error)
+type MyselfResourceService struct {
+	client *Client
 }
 
-func (c *jiraClient) GetCurrentUser() (User, error) {
-	user := User{}
-
-	resp, err := c.B.Call(http.MethodGet, "rest/api/3/myself", c.Email, c.Token, nil, &user)
+func (m *MyselfResourceService) Myself(ctx context.Context) (*User, error) {
+	req, err := m.client.NewRequest(ctx, http.MethodGet, "rest/api/3/myself", nil)
 	if err != nil {
-		if resp.StatusCode == http.StatusUnauthorized {
-			return user, ErrUnauthorized
-		}
+		return nil, err
 	}
-	resp.Body.Close()
+
+	user := new(User)
+	err = m.client.Do(req, user)
+	if err != nil {
+		return nil, err
+	}
 
 	return user, nil
-}
-
-func UnmarshalUser(data []byte) (User, error) {
-	var r User
-	err := json.Unmarshal(data, &r)
-	return r, err
-}
-
-func (r *User) Marshal() ([]byte, error) {
-	return json.Marshal(r)
 }
 
 type User struct {

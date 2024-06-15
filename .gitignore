@@ -14,4 +14,7 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Internal TODO list.
+TODO.md
+config.yaml 
 *.json
