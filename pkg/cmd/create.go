@@ -169,7 +169,7 @@ func (c *CreateCommand) checkoutOrCreateBranch(b string) error {
 	err = c.git.ShowRef(exec.Command, b)
 	if err != nil {
 		// ShowRef returns error when branch does not exist.
-		err = c.git.Branch(exec.Command, b)
+		_, err = c.git.Branch(exec.Command, b)
 		if err != nil {
 			return err
 		}
