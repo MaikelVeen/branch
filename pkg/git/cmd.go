@@ -13,7 +13,6 @@ const (
 	StatusCommand   string = "status"
 	BranchCommand   string = "branch"
 	CheckoutCommand string = "checkout"
-	RemoteCmd       string = "remote"
 )
 
 // ExecContext is a function that returns an external command being prepared or run
@@ -96,11 +95,4 @@ func (g *Commander) ShortSymbolicRef(ctx ExecContext) (string, error) {
 	}
 
 	return strings.TrimSpace(string(out)), nil
-}
-
-// Remote executes `git remote <args>`
-//
-// https://git-scm.com/docs/git-remote
-func (g *Commander) Remote(ctx ExecContext, args ...string) (string, error) {
-	return executewithOutput(ctx, RemoteCmd, args...)
 }

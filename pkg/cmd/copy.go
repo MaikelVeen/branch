@@ -49,7 +49,8 @@ func (c *CopyCommand) Execute(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
+	branch = strings.TrimSpace(branch)
 	clipboard.Write(clipboard.FmtText, []byte(branch))
-	c.logger.Info(fmt.Sprintf("%s copied to clipboard", strings.TrimSpace(branch)))
+	c.logger.Info(fmt.Sprintf("%s copied to clipboard", branch))
 	return nil
 }

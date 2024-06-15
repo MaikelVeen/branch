@@ -19,3 +19,4 @@ TODO.md
 config.yaml 
 *.json
 dist/
+profile.cov

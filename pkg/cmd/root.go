@@ -63,7 +63,6 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(NewCreateCommand().Command)
 	rootCmd.AddCommand(NewCopyCommand().Command)
-	rootCmd.AddCommand(newPullRequestCommand().cmd)
 	rootCmd.AddCommand(jira.NewCommand().Command)
 	rootCmd.AddCommand(config.NewCommand().Command)
 }
