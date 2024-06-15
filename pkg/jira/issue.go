@@ -34,12 +34,12 @@ type Issue struct {
 }
 
 type IssueFields struct {
-	Issuetype Issuetype `json:"issuetype"`
+	Issuetype IssueType `json:"issuetype"`
 	Updated   string    `json:"updated"`
 	Summary   string    `json:"summary"`
 }
 
-type Issuetype struct {
+type IssueType struct {
 	Self           string `json:"self"`
 	ID             string `json:"id"`
 	Description    string `json:"description"`

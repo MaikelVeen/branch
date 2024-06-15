@@ -15,7 +15,7 @@ var (
 )
 
 const (
-	KeyPattern = "pattern"
+	KeyTemplate = "template"
 
 	defaultConfigFilename = "config"
 	path                  = "$HOME/.config/branch/"
@@ -24,7 +24,7 @@ const (
 
 // Config represents the configuration of the application.
 type Config struct {
-	Pattern *string `yaml:"pattern"`
+	Template *string `yaml:"template"`
 }
 
 func (c *Config) Save() error {
@@ -55,13 +55,13 @@ func Load() (*Config, error) {
 
 // Options is a list of all available configuration options.
 var Options = map[string]*Option{
-	KeyPattern: {
-		Key:          KeyPattern,
-		Description:  "The pattern to use for branch names",
-		CurrentValue: func(cfg Config) *string { return cfg.Pattern },
+	KeyTemplate: {
+		Key:          KeyTemplate,
+		Description:  "Template to use for branch name",
+		CurrentValue: func(cfg Config) *string { return cfg.Template },
 		SetValue: func(cfg *Config, value string) error {
-			cfg.Pattern = &value
-			configuration.Set(KeyPattern, value)
+			cfg.Template = &value
+			configuration.Set(KeyTemplate, value)
 			return nil
 		},
 	},

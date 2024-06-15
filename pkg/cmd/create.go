@@ -6,10 +6,13 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/MaikelVeen/branch/pkg/git"
+	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/charmbracelet/huh"
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
@@ -19,8 +22,8 @@ import (
 const (
 	ArgBase          = "base"
 	ArgBaseShort     = "b"
-	ArgsPattern      = "pattern"
-	ArgsPatternShort = "p"
+	ArgTemplate      = "template"
+	ArgTemplateShort = "t"
 )
 
 type CreateCommand struct {
@@ -29,11 +32,8 @@ type CreateCommand struct {
 	logger *slog.Logger
 	git    *git.Commander
 
-	// Pattern to use for branch name.
-	pattern string
-
-	// Base branch, if not on this branch, ask to switch.
-	base string
+	Template   string
+	BaseBranch string // TODO: Make configurable.
 }
 
 func NewCreateCommand() *CreateCommand {
@@ -57,10 +57,22 @@ func NewCreateCommand() *CreateCommand {
 
 	flagset := cc.Command.Flags()
 
-	flagset.StringVarP(&cc.pattern, ArgsPattern, ArgsPatternShort, "", "Pattern to use for branch name")
-	_ = viper.BindPFlag(ArgsPattern, flagset.Lookup(ArgsPattern))
+	flagset.StringVarP(
+		&cc.Template,
+		ArgTemplate,
+		ArgTemplateShort,
+		"{{.type}}/{{.key}}-{{.summary}}",
+		"Template to use for branch name",
+	)
+	_ = viper.BindPFlag(ArgTemplate, flagset.Lookup(ArgTemplate))
 
-	flagset.StringVarP(&cc.base, ArgBase, ArgBaseShort, "main", "Base branch to create the new branch from")
+	flagset.StringVarP(
+		&cc.BaseBranch,
+		ArgBase,
+		ArgBaseShort,
+		"main",
+		"Base branch to create the new branch from",
+	)
 	_ = viper.BindPFlag(ArgBase, flagset.Lookup(ArgBase))
 
 	return cc
@@ -73,23 +85,26 @@ func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := c.checkPreconditions(); err != nil {
+	if err = c.checkPreconditions(); err != nil {
 		return err
 	}
 
-	if err = c.checkBaseBranch(c.base); err != nil {
+	if err = c.checkBaseBranch(c.BaseBranch); err != nil {
 		return err
 	}
 
 	key := args[0]
-	_, err = client.Issue.GetIssue(cmd.Context(), key)
+	issue, err := client.Issue.GetIssue(cmd.Context(), key)
 	if err != nil {
 		c.logger.Error(fmt.Errorf("failed to get issue: %w", err).Error())
 		return err
 	}
 
-	// TODO: Get issue and construct branch name.
-	branch := "test"
+	branch, err := BranchNameFromTemplate(c.Template, issue)
+	if err != nil {
+		return err
+	}
+
 	if err = c.checkoutOrCreateBranch(branch); err != nil {
 		return err
 	}
@@ -166,4 +181,25 @@ func (c *CreateCommand) checkoutOrCreateBranch(b string) error {
 	}
 
 	return nil
+}
+
+// BranchNameFromTemplate generates a branch name from a given template and Jira issue.
+func BranchNameFromTemplate(tmpl string, issue *jira.Issue) (string, error) {
+	t, err := template.New("branchName").Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
+
+	params := map[string]string{
+		"key":     issue.Key,
+		"type":    strings.ToLower(issue.Fields.Issuetype.Name),
+		"summary": git.FormatAsValidRef(issue.Fields.Summary),
+	}
+
+	var b strings.Builder
+	if err = t.Execute(&b, params); err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }
