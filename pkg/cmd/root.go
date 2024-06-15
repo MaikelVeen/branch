@@ -67,15 +67,6 @@ func init() {
 	rootCmd.AddCommand(config.NewCommand().Command)
 }
 
-func runParentPersistentPreRunE(cmd *cobra.Command, args []string) error {
-	if parent := cmd.Parent(); parent != nil {
-		if parent.PersistentPreRunE != nil {
-			return parent.PersistentPreRunE(parent, args)
-		}
-	}
-	return nil
-}
-
 func initializeConfig(cmd *cobra.Command) error {
 	v, err := cfg.Init()
 	if err != nil {

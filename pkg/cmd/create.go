@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/MaikelVeen/branch/pkg/git"
-	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/charmbracelet/huh"
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
@@ -27,7 +27,6 @@ type CreateCommand struct {
 	Command *cobra.Command
 
 	logger *slog.Logger
-	client *jira.Client
 	git    *git.Commander
 
 	// Pattern to use for branch name.
@@ -54,13 +53,6 @@ func NewCreateCommand() *CreateCommand {
 		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
 		RunE:    cc.Execute,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := runParentPersistentPreRunE(cmd, args); err != nil {
-				return err
-			}
-
-			return nil
-		},
 	}
 
 	flagset := cc.Command.Flags()
@@ -75,8 +67,13 @@ func NewCreateCommand() *CreateCommand {
 }
 
 func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
-	err := c.checkPreconditions()
+	client, err := auth.NewClientFromContext(cmd.Context())
 	if err != nil {
+		c.logger.Warn("a valid auth context is needed for `create`. Run `branch jira auth init` to authenticate.")
+		return err
+	}
+
+	if err := c.checkPreconditions(); err != nil {
 		return err
 	}
 
@@ -85,7 +82,7 @@ func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
 	}
 
 	key := args[0]
-	_, err = c.client.Issue.GetIssue(cmd.Context(), key)
+	_, err = client.Issue.GetIssue(cmd.Context(), key)
 	if err != nil {
 		c.logger.Error(fmt.Errorf("failed to get issue: %w", err).Error())
 		return err
@@ -93,9 +90,9 @@ func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
 
 	// TODO: Get issue and construct branch name.
 	branch := "test"
-	// if err = c.checkoutOrCreateBranch(branch); err != nil {
-	//	return err
-	//}
+	if err = c.checkoutOrCreateBranch(branch); err != nil {
+		return err
+	}
 
 	c.logger.Info(fmt.Sprintf("checked out %s", branch))
 	return nil
