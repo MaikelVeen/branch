@@ -31,6 +31,7 @@ var rootCmd = &cobra.Command{
 		authCtx, err := auth.LoadUserContext()
 		if err != nil {
 			if errors.Is(err, auth.ErrAuthContextMissing) {
+				fmt.Println("No authentication context found. Please run 'branch jira auth init' to authenticate.")
 				return nil
 			}
 			return err
@@ -60,18 +61,19 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(NewCreateCommand().cmd)
+	rootCmd.AddCommand(NewCreateCommand().Command)
 	rootCmd.AddCommand(newPullRequestCommand().cmd)
 	rootCmd.AddCommand(jira.NewCommand().Command)
 	rootCmd.AddCommand(config.NewCommand().Command)
 }
 
-func runParentPersistentPreRun(cmd *cobra.Command, args []string) {
+func runParentPersistentPreRunE(cmd *cobra.Command, args []string) error {
 	if parent := cmd.Parent(); parent != nil {
-		if parent.PersistentPreRun != nil {
-			parent.PersistentPreRun(parent, args)
+		if parent.PersistentPreRunE != nil {
+			return parent.PersistentPreRunE(parent, args)
 		}
 	}
+	return nil
 }
 
 func initializeConfig(cmd *cobra.Command) error {

@@ -8,21 +8,33 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/MaikelVeen/branch/pkg/cmd/jira/auth"
 	"github.com/MaikelVeen/branch/pkg/git"
 	"github.com/MaikelVeen/branch/pkg/jira"
 	"github.com/charmbracelet/huh"
 	"github.com/lmittmann/tint"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-const baseBranch = "develop"
+const (
+	ArgBase          = "base"
+	ArgBaseShort     = "b"
+	ArgsPattern      = "pattern"
+	ArgsPatternShort = "p"
+)
 
 type CreateCommand struct {
-	cmd    *cobra.Command
+	Command *cobra.Command
+
 	logger *slog.Logger
 	client *jira.Client
 	git    *git.Commander
+
+	// Pattern to use for branch name.
+	pattern string
+
+	// Base branch, if not on this branch, ask to switch.
+	base string
 }
 
 func NewCreateCommand() *CreateCommand {
@@ -36,46 +48,54 @@ func NewCreateCommand() *CreateCommand {
 		git: git.NewCommander(),
 	}
 
-	cc.cmd = &cobra.Command{
+	cc.Command = &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Creates a new git branch based on a ticket identifier",
 		RunE:    cc.Execute,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			runParentPersistentPreRun(cmd, args)
-
-			c, err := auth.NewClientFromContext(cmd.Context())
-			if err != nil {
-				cc.logger.Warn("a valid auth context is needed for `create`. Run `branch jira auth init` to authenticate.")
+			if err := runParentPersistentPreRunE(cmd, args); err != nil {
 				return err
 			}
 
-			cc.client = c
 			return nil
 		},
 	}
 
+	flagset := cc.Command.Flags()
+
+	flagset.StringVarP(&cc.pattern, ArgsPattern, ArgsPatternShort, "", "Pattern to use for branch name")
+	_ = viper.BindPFlag(ArgsPattern, flagset.Lookup(ArgsPattern))
+
+	flagset.StringVarP(&cc.base, ArgBase, ArgBaseShort, "main", "Base branch to create the new branch from")
+	_ = viper.BindPFlag(ArgBase, flagset.Lookup(ArgBase))
+
 	return cc
 }
 
-func (c *CreateCommand) Execute(_ *cobra.Command, _ []string) error {
-	// key := args[0]
-
+func (c *CreateCommand) Execute(cmd *cobra.Command, args []string) error {
 	err := c.checkPreconditions()
 	if err != nil {
 		return err
 	}
 
-	if err = c.checkBaseBranch(baseBranch); err != nil {
+	if err = c.checkBaseBranch(c.base); err != nil {
+		return err
+	}
+
+	key := args[0]
+	_, err = c.client.Issue.GetIssue(cmd.Context(), key)
+	if err != nil {
+		c.logger.Error(fmt.Errorf("failed to get issue: %w", err).Error())
 		return err
 	}
 
 	// TODO: Get issue and construct branch name.
 	branch := "test"
-	if err = c.checkoutOrCreateBranch(branch); err != nil {
-		return err
-	}
+	// if err = c.checkoutOrCreateBranch(branch); err != nil {
+	//	return err
+	//}
 
 	c.logger.Info(fmt.Sprintf("checked out %s", branch))
 	return nil
