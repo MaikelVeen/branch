@@ -105,6 +105,6 @@ func createDefaultConfigFile() error {
 		return err
 	}
 
-	fn := fmt.Sprintf("%s/%s.yaml", path, "defaultConfigFilename")
+	fn := fmt.Sprintf("%s/%s.yaml", path, defaultConfigFilename)
 	return os.WriteFile(fn, []byte(""), 0600)
 }
